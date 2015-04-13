@@ -48,9 +48,9 @@ int sqlite3_insert(char *host,char *ip,char *user,char *pass,char *role){
 		return 1;
         ret=sqlite3_prepare_v2(db,sql_insert,-1,&stmt,0);
         if(ret != SQLITE_OK){
-                fprintf(stderr,"Sql prepare fail\n");
-		sqlite3_finalize(stmt);
-		_sqlite3_disconnect();
+            fprintf(stderr,"Sql prepare fail\n");
+			sqlite3_finalize(stmt);
+			_sqlite3_disconnect();
 		return 1;
         }else{
                 sqlite3_bind_text(stmt,1,host,strlen(host),NULL);
@@ -72,9 +72,9 @@ int sqlite3_select(char *whereid,char *wherevlaue,Res *res){
 		return 1;
 	ret=sqlite3_prepare_v2(db,sql_select,-1,&stmt,0);
         if(ret != SQLITE_OK){
-                fprintf(stderr,"Sql prepare fail");
-		sqlite3_finalize(stmt);
-		_sqlite3_disconnect();
+            fprintf(stderr,"Sql prepare fail");
+			sqlite3_finalize(stmt);
+			_sqlite3_disconnect();
 		return 1;
         }else{
                 //sqlite3_bind_text(stmt,1,whereid,strlen(whereid),NULL);
@@ -83,27 +83,60 @@ int sqlite3_select(char *whereid,char *wherevlaue,Res *res){
                 while(1){
                         ret=sqlite3_step(stmt);
                         if(ret == SQLITE_ROW){
-				int ncol=sqlite3_column_count(stmt);
-				int i;
-				for(i=0;i<ncol;i++){
-					res->hostname[row]=sqlite3_column_text(stmt,0);
-					res->ip[row]=sqlite3_column_text(stmt,1);
-					res->user[row]=sqlite3_column_text(stmt,2);
-					res->password[row]=sqlite3_column_text(stmt,3);
-					res->role[row]=sqlite3_column_text(stmt,4);
-				}
-                                row++;
+							res->hostname[row]=sqlite3_column_text(stmt,0);
+							res->ip[row]=sqlite3_column_text(stmt,1);
+							res->user[row]=sqlite3_column_text(stmt,2);
+							res->password[row]=sqlite3_column_text(stmt,3);
+							res->role[row]=sqlite3_column_text(stmt,4);
+                            row++;
                         }else if(ret == SQLITE_DONE){
-                                break;
+                            break;
                         }else{
-                                fprintf(stderr,"Select Failed.\n");
-				sqlite3_finalize(stmt);
-				_sqlite3_disconnect();
-                                return 1;
+                            fprintf(stderr,"Select Failed.\n");
+							sqlite3_finalize(stmt);
+							_sqlite3_disconnect();
+                            return 1;
                         }
                 }
         }
         sqlite3_finalize(stmt);
 
+	return 0;
+}
+
+int sqlite3_table(char *whereid,char *wherevlaue,char *result[],int *count){
+	char *sql_insert="select * from hostinfo where ";
+	strcat(sql_insert,whereid);
+	strcat(sql_insert,"=");
+	strcat(sql_insert,wherevlaue);
+
+	char **presult;
+	int *nrow,*ncol,i;
+
+	if(_sqlite3_connect())
+			return 1;
+	ret=sqlite3_get_table(db,sql_insert,&presult,nrow,ncol,&errmsg);
+	if(errmsg!=NULL){
+		sqlite3_free_table(presult);
+		sqlite3_free(errmsg);
+		_sqlite3_disconnect();
+		return 1
+	}
+	if(ret==SQLITE_OK){
+		if(nrow==0){
+			sqlite3_free_table(presult);
+			sqlite3_free(errmsg);
+			_sqlite3_disconnect();
+			return -1;
+		}
+		for(i=0;i<ncol;i++){
+			result[i]=(char*)malloc(sizeof(char*));
+			result[i]=presult[ncol++];
+		}
+		count=ncol;
+	}
+	sqlite3_free_table(presult);
+	sqlite3_free(errmsg);
+	_sqlite3_disconnect();
 	return 0;
 }

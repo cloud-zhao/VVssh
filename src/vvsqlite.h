@@ -34,3 +34,6 @@ int sqlite3_create(void);
 
 // close database link
 int _sqlite3_disconnect(void);
+
+//get_all_table to char ***pazResult
+int sqlite3_table(char *whereid,char *wherevlaue,char *result,int *count);
