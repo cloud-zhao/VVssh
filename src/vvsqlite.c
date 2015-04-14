@@ -66,7 +66,10 @@ int sqlite3_insert(char *host,char *ip,char *user,char *pass,char *role){
 }
 
 int sqlite3_select(char *whereid,char *wherevlaue,Res *res){
-	char *sql_select="select * from hostinfo where hostname=?";
+	char sql_selects[255]="select * from hostinfo where ";
+	char *sql_select=sql_selects;
+	strcat(sql_select,whereid);
+	strcat(sql_select,"=?");
 
 	if(_sqlite3_connect())
 		return 1;
@@ -83,19 +86,20 @@ int sqlite3_select(char *whereid,char *wherevlaue,Res *res){
                 while(1){
                         ret=sqlite3_step(stmt);
                         if(ret == SQLITE_ROW){
-							res->hostname[row]=sqlite3_column_text(stmt,0);
-							res->ip[row]=sqlite3_column_text(stmt,1);
-							res->user[row]=sqlite3_column_text(stmt,2);
-							res->password[row]=sqlite3_column_text(stmt,3);
-							res->role[row]=sqlite3_column_text(stmt,4);
-                            row++;
+				strcpy(res->hostname[row],sqlite3_column_text(stmt,0));
+				strcpy(res->ip[row],sqlite3_column_text(stmt,1));
+				strcpy(res->user[row],sqlite3_column_text(stmt,2));
+				strcpy(res->password[row],sqlite3_column_text(stmt,3));
+				strcpy(res->role[row],sqlite3_column_text(stmt,4));
+				row++;
                         }else if(ret == SQLITE_DONE){
-                            break;
+				fprintf(stderr,"Already select done\n");
+                            	break;
                         }else{
-                            fprintf(stderr,"Select Failed.\n");
-							sqlite3_finalize(stmt);
-							_sqlite3_disconnect();
-                            return 1;
+				fprintf(stderr,"Select Failed.\n");
+				sqlite3_finalize(stmt);
+				_sqlite3_disconnect();
+				return 1;
                         }
                 }
         }
@@ -104,23 +108,26 @@ int sqlite3_select(char *whereid,char *wherevlaue,Res *res){
 	return 0;
 }
 
-int sqlite3_table(char *whereid,char *wherevlaue,char *result[],int *count){
-	char *sql_insert="select * from hostinfo where ";
-	strcat(sql_insert,whereid);
-	strcat(sql_insert,"=");
-	strcat(sql_insert,wherevlaue);
+int sqlite3_alltable(char *whereid,char *wherevlaue,char **result,int *count){
+	char sql_selects[255]="select * from hostinfo where ";
+	char *sql_select=sql_selects;
+	strcat(sql_select,whereid);
+	strcat(sql_select,"='");
+	strcat(sql_select,wherevlaue);
+	strcat(sql_select,"'");
 
 	char **presult;
-	int *nrow,*ncol,i;
+	int nrow,ncol,i;
 
 	if(_sqlite3_connect())
 			return 1;
-	ret=sqlite3_get_table(db,sql_insert,&presult,nrow,ncol,&errmsg);
+	ret=sqlite3_get_table(db,sql_select,&presult,&nrow,&ncol,&errmsg);
 	if(errmsg!=NULL){
+		fprintf(stderr,"get table fail:%s\n",errmsg);
 		sqlite3_free_table(presult);
 		sqlite3_free(errmsg);
 		_sqlite3_disconnect();
-		return 1
+		return 1;
 	}
 	if(ret==SQLITE_OK){
 		if(nrow==0){
@@ -129,14 +136,65 @@ int sqlite3_table(char *whereid,char *wherevlaue,char *result[],int *count){
 			_sqlite3_disconnect();
 			return -1;
 		}
+		int nn=ncol;
+		//printf("\t%d\n\t%d\n",ncol,nrow);
 		for(i=0;i<ncol;i++){
-			result[i]=(char*)malloc(sizeof(char*));
-			result[i]=presult[ncol++];
+			//result[i]=(char *)malloc(sizeof(char));
+			strcpy(result[i],presult[nn++]);
+			//printf("\t%s\n",result[i]);
 		}
-		count=ncol;
+		*count=ncol;
 	}
 	sqlite3_free_table(presult);
 	sqlite3_free(errmsg);
 	_sqlite3_disconnect();
+	return 0;
+}
+
+Res* init_res(void){
+        Res *prr=(Res*)malloc(sizeof(Res));
+        int i;
+        for(i=0;i<10;i++)
+                prr->hostname[i]=(char*)malloc(sizeof(char));
+        for(i=0;i<10;i++)
+                prr->ip[i]=(char*)malloc(sizeof(char));
+        for(i=0;i<10;i++)
+                prr->user[i]=(char*)malloc(sizeof(char));
+        for(i=0;i<10;i++)
+                prr->password[i]=(char*)malloc(sizeof(char));
+        for(i=0;i<10;i++)
+                prr->role[i]=(char*)malloc(sizeof(char));
+        return prr;
+}
+
+int free_res(Res *prr){
+	int i;
+	for(i=0;i<10;i++)
+		free(prr->hostname[i]);
+	for(i=0;i<10;i++)
+		free(prr->ip[i]);
+	for(i=0;i<10;i++)
+		free(prr->user[i]);
+	for(i=0;i<10;i++)
+		free(prr->password[i]);
+	for(i=0;i<10;i++)
+		free(prr->role[i]);
+	free(prr);
+	return 0;
+}
+
+char** init_Res(void){
+	char **pres;
+	int i=0;
+	pres=(char**)malloc(sizeof(char*)*100);
+	for(;i<100;i++)
+		pres[i]=(char*)malloc(sizeof(char));
+	return pres;
+}
+
+int free_Res(char **pres){
+	int i=0;
+	for(;i<100;i++)
+		free(pres[i]);
 	return 0;
 }

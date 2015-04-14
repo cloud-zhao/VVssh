@@ -5,14 +5,20 @@
 #ifndef _STRING_h
 #include <string.h>
 #endif
+#ifndef _STDLIB_h
+#include <stdlib.h>
+#endif
+#ifndef _MALLOC_h
+#include <malloc.h>
+#endif
 
 typedef struct Result
 {
-	const char *hostname[10];
-	const char *ip[10];
-	const char *user[10];
-	const char *password[10];
-	const char *role[10];
+	char *hostname[10];
+	char *ip[10];
+	char *user[10];
+	char *password[10];
+	char *role[10];
 }Res;
 
 sqlite3 *db;
@@ -36,4 +42,12 @@ int sqlite3_create(void);
 int _sqlite3_disconnect(void);
 
 //get_all_table to char ***pazResult
-int sqlite3_table(char *whereid,char *wherevlaue,char *result,int *count);
+int sqlite3_alltable(char *whereid,char *wherevlaue,char *result[],int *count);
+
+//initialization struct result;
+Res* init_res(void);
+char** init_Res(void);
+
+//free struct result;
+int free_res(Res *prr);
+int free_Res(char **pres);
