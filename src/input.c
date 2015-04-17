@@ -13,13 +13,20 @@ int main(int argc,char **argv){
 		return 1;
 	}
 
-	FILE *pfile=NULL;
-	char *content=(char*)malloc(sizeof(char)*1024);
+	
+
+	FILE *fp=NULL;
 	char *example="hostname|ip|user|password|role\n\tor use /** Notes";
 	if((fp=fopen(filename,"r"))==NULL){
 		fprintf(stderr,"Cannot open file:%s\n",filename);
 		return 1;
 	}
+
+	char *content=(char*)malloc(sizeof(char)*1024);
+	char *hostinfo[10];
+	int i;
+	for(i=0;i<5;i++)
+		hostinfo[i]=(char*)malloc(sizeof(char));
 
 	while(!feof(fp)){
 		fgets(content,1024,fp);
@@ -30,10 +37,6 @@ int main(int argc,char **argv){
 			fprintf(stderr,"file content format error:\n\t%s\n",example);
 			continue;
 		}	
-		char *hostinfo[10];
-		int i;
-		for(i=0;i<5;i++)
-			hostinfo[i]=(char*)malloc(sizeof(char));
 		i=0;
 		while(substr){
 			strcpy(hostinfo[i++],substr);
@@ -45,6 +48,16 @@ int main(int argc,char **argv){
 		}
 		if(i==3)
 			strcpy(hostinfo[4],"default");
-		i=sqlite3_insert(hostinfo[0],hostinfo[1],hostinfo[2],hostinfo[3],hostinfo[4]);
+		if(sqlite3_insert(hostinfo[0],hostinfo[1],hostinfo[2],hostinfo[3],hostinfo[4]))
+			fprintf(stderr,"Error: insert data failed\n");
+		else
+			printf("%s\t%s\t%s\t%s\t%s\tinsert successery!!!\n",hostinfo[0],hostinfo[1]
+				,hostinfo[2],hostinfo[3],hostinfo[4]);
 	}
+
+	for(i=0;i<5;i++)
+		free(hostinfo[i]);
+	free(content);
+	fclose(fp);
+	return 0;
 }
