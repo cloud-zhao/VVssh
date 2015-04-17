@@ -42,7 +42,7 @@ int sqlite3_create(void);
 int _sqlite3_disconnect(void);
 
 //get_all_table to char ***pazResult
-int sqlite3_alltable(char *whereid,char *wherevlaue,char *result[],int *count);
+int sqlite3_alltable(char *whereid,char *wherevlaue,char **result,int *count);
 
 //initialization struct result;
 Res* init_res(void);
