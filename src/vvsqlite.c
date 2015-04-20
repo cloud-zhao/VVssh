@@ -16,7 +16,7 @@ int _sqlite3_connect(void){
 		return 1;
 	}
 
-	printf("Open database\n");
+	//printf("Open database\n");
 	return 0;
 }
 
