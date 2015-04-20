@@ -20,7 +20,7 @@ user=`echo $2 | awk -F '|' '{print $3}'`
 password=`echo $2 | awk -F '|' '{print $4}'`
 role=`echo $2 | awk -F '|' '{print $5}'`
 
-sql="updata hostinfo set "
+sql="update hostinfo set "
 
 [ ${host:=0} != 0 ] && sql=${sql}"hostname='$host',"
 [ ${ip:=0} != 0 ] && sql=${sql}"ip='$ip',"
