@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
-#include "vvsqlite.h"
+#include "../lib/vvsqlite.h"
 
 int main(int argc,char **argv){
 	char *filename=NULL;

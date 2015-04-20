@@ -15,7 +15,7 @@
 #define _GNU_SOURCE
    
 #include <libssh2.h>  
-#include "vvsqlite.h"
+#include "../lib/vvsqlite.h"
   
 #define COPYRIGHT "VVSSH Copyright (C) 2015, V.V wlsdhzy@163.com\n"  
    
