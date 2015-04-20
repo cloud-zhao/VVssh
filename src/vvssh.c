@@ -179,9 +179,9 @@ int main (int argc, char *argv[])
 				free_Res(sql_result);
 			}
 		}
+		printf("Login info:%s\t%s\t%s\t%s\n",hostname,ip,user,role);
+		goto SSH;
 	}
-	printf("Login info:%s\t%s\t%s\t%s\n",hostname,ip,user,role);
-	goto SSH;
 
 	if(ip!=NULL){
 		whereid="ip";
@@ -215,8 +215,8 @@ int main (int argc, char *argv[])
 				free_Res(sql_result);
 			}
 		}
+		printf("Login info:%s\t%s\t%s\t%s\n",hostname,ip,user,role);
 	}
-	printf("Login info:%s\t%s\t%s\t%s\n",hostname,ip,user,role);
 
   SSH:
     if (libssh2_init (0) != 0) {  
