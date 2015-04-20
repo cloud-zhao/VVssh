@@ -46,4 +46,4 @@ then
 fi
 
 sqlite3 $database "$sql"
-echo "updata sucessful"
+[ $? == 0 ] && echo "updata sucessful"
