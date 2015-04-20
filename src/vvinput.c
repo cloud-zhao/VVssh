@@ -24,12 +24,13 @@ int main(int argc,char **argv){
 
 	char *content=(char*)malloc(sizeof(char)*1024);
 	char *hostinfo[10];
-	int i;
+	int i,len;
 	for(i=0;i<5;i++)
 		hostinfo[i]=(char*)malloc(sizeof(char));
 
-	while(!feof(fp)){
-		fgets(content,1024,fp);
+	while((fgets(content,1024,fp))!=NULL){
+		len=strlen(content);
+		content[len-1]='\0';
 		if(strstr(content,"/**") != NULL)
 			continue;
 		char *substr=strtok(content,"|");
