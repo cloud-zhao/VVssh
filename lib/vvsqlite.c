@@ -34,6 +34,7 @@ int sqlite3_create(void){
         }
         sqlite3_free(errmsg);
 	_sqlite3_disconnect();
+	//printf("Database install complete.\n");
 	return 0;
 }
 
