@@ -1,0 +1,2 @@
+noinst_LIBRARIES=libvvsqlite.a
+libvvsqlite_a_SOURCES=vvsqlite.c
