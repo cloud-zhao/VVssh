@@ -18,6 +18,7 @@ typedef struct Result
 	char *ip[10];
 	char *user[10];
 	char *password[10];
+	char *pkey[10];
 	char *role[10];
 }Res;
 
@@ -27,7 +28,7 @@ int ret;
 sqlite3_stmt *stmt;
 
 // insert hostinfo
-int sqlite3_insert(char *host,char *ip,char *user,char *pass,char *role);
+int sqlite3_insert(char *host,char *ip,char *user,char *pass,char *pkey,char *role);
 
 // select hostinfo
 int sqlite3_select(char *whereid,char *wherevlaue,Res *res);

@@ -21,7 +21,7 @@ int _sqlite3_connect(void){
 }
 
 int sqlite3_create(void){
-	char *sql_create_table="create table hostinfo(hostname varchar(50) not null,ip varchar(20) not null primary key,user varchar(20) default 'root',password varchar(255) not null,role varchar(255))";
+	char *sql_create_table="create table hostinfo(hostname varchar(50) not null,ip varchar(20) not null,primary key (hostname,ip),user varchar(20) default 'root',password varchar(255),pkey varchar(100),role varchar(255))";
 
 	if(_sqlite3_connect())
 		return 1;
@@ -38,12 +38,20 @@ int sqlite3_create(void){
 	return 0;
 }
 
-int sqlite3_insert(char *host,char *ip,char *user,char *pass,char *role){
-	char *sql_insert="insert into hostinfo values(?,?,?,?,?)";
+int sqlite3_insert(char *host,char *ip,char *user,char *pass,char *pkey,char *role){
+	char *sql_insert="insert into hostinfo values(?,?,?,?,?,?)";
 	if(user==NULL)
 		user="root";
 	if(role==NULL)
 		role="default";
+	if((pass==NULL) && (pkey==NULL)){
+		fprintf(stderr,"Your must set password or private key\n");
+		return 1;
+	}else if(pass==NULL){
+		pass="123456";
+	}else if(pkey==NULL){
+		pkey="/root/.ssh/id_rsa";
+	}
 
 	if(_sqlite3_connect())
 		return 1;
@@ -58,7 +66,8 @@ int sqlite3_insert(char *host,char *ip,char *user,char *pass,char *role){
                 sqlite3_bind_text(stmt,2,ip,strlen(ip),NULL);
                 sqlite3_bind_text(stmt,3,user,strlen(user),NULL);
                 sqlite3_bind_text(stmt,4,pass,strlen(pass),NULL);
-                sqlite3_bind_text(stmt,5,role,strlen(role),NULL);
+                sqlite3_bind_text(stmt,5,pkey,strlen(pkey),NULL);
+                sqlite3_bind_text(stmt,6,role,strlen(role),NULL);
                 sqlite3_step(stmt);
         }
         sqlite3_finalize(stmt);
@@ -91,7 +100,8 @@ int sqlite3_select(char *whereid,char *wherevlaue,Res *res){
 				strcpy(res->ip[row],sqlite3_column_text(stmt,1));
 				strcpy(res->user[row],sqlite3_column_text(stmt,2));
 				strcpy(res->password[row],sqlite3_column_text(stmt,3));
-				strcpy(res->role[row],sqlite3_column_text(stmt,4));
+				strcpy(res->pkey[row],sqlite3_column_text(stmt,4));
+				strcpy(res->role[row],sqlite3_column_text(stmt,5));
 				row++;
                         }else if(ret == SQLITE_DONE){
 				fprintf(stderr,"Already select done\n");
@@ -156,15 +166,17 @@ Res* init_res(void){
         Res *prr=(Res*)malloc(sizeof(Res));
         int i;
         for(i=0;i<10;i++)
-                prr->hostname[i]=(char*)malloc(sizeof(char));
+                prr->hostname[i]=(char*)malloc(sizeof(char)*100);
         for(i=0;i<10;i++)
-                prr->ip[i]=(char*)malloc(sizeof(char));
+                prr->ip[i]=(char*)malloc(sizeof(char)*100);
         for(i=0;i<10;i++)
-                prr->user[i]=(char*)malloc(sizeof(char));
+                prr->user[i]=(char*)malloc(sizeof(char)*100);
         for(i=0;i<10;i++)
-                prr->password[i]=(char*)malloc(sizeof(char));
+                prr->password[i]=(char*)malloc(sizeof(char)*100);
         for(i=0;i<10;i++)
-                prr->role[i]=(char*)malloc(sizeof(char));
+                prr->pkey[i]=(char*)malloc(sizeof(char)*100);
+        for(i=0;i<10;i++)
+                prr->role[i]=(char*)malloc(sizeof(char)*100);
         return prr;
 }
 
@@ -179,6 +191,8 @@ int free_res(Res *prr){
 	for(i=0;i<10;i++)
 		free(prr->password[i]);
 	for(i=0;i<10;i++)
+		free(prr->pkey[i]);
+	for(i=0;i<10;i++)
 		free(prr->role[i]);
 	free(prr);
 	return 0;
@@ -189,7 +203,7 @@ char** init_Res(void){
 	int i=0;
 	pres=(char**)malloc(sizeof(char*)*100);
 	for(;i<100;i++)
-		pres[i]=(char*)malloc(sizeof(char));
+		pres[i]=(char*)malloc(sizeof(char)*100);
 	return pres;
 }
 
