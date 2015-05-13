@@ -30,6 +30,9 @@ sqlite3_stmt *stmt;
 // insert hostinfo
 int sqlite3_insert(char *host,char *ip,char *user,char *pass,char *pkey,char *role);
 
+//delete hostinfo
+int sqlite3_delete(char *host,char *ip);
+
 // select hostinfo
 int sqlite3_select(char *whereid,char *wherevlaue,Res *res);
 
@@ -44,6 +47,9 @@ int _sqlite3_disconnect(void);
 
 //get_all_table to char ***pazResult
 int sqlite3_alltable(char *whereid,char *wherevlaue,char **result,int *count);
+
+//check host or ip exists
+int sqlite3_checkinfo(char *host,char *ip);
 
 //initialization struct result;
 Res* init_res(void);

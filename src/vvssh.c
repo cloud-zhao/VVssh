@@ -51,13 +51,18 @@ static int _help(void){
 	printf("-h,\t--hostname\t\t\tTarget host name.\n\t");
 	printf("-i,\t--ipaddr\t\t\tTarget host ip.\n\t");
 	printf("-u,\t--user\t\t\t\tTarget host user.\n\t");
-	printf("-p,\t--password\t\t\tTarget host user.\n\t");
+	printf("-p,\t--password\t\t\tTarget host password.\n\t");
+	printf("-k,\t--key\t\t\t\tTarget host private key.\n\t");
 	printf("-r,\t--role=[description]\t\tTarget host description.\n\t");
 	printf("-H,\t--help\t\t\t\tPrintf help info.\n");
 	printf("\n\nUsage:\n\t");
 	printf("First login: vvssh -h test1 -i 127.0.0.1 -u root -p root [--role=role]\n\t");
+	printf("             vvssh -h test1 -i 127.0.0.1 -u root -k ./id_rsa [--role=role]\n\t");
+	printf("             vvssh -h test1 -i 127.0.0.1 -u root -p root -k ./id_rsa [--role=role]\n\t");
 	printf("Later login: vvssh -h test1\n\t");
-	printf("             vvssh -i ipaddr\n\n");
+	printf("             vvssh -i ipaddr\n\t");
+	printf("	     vvssh -h test1 -i new_ip -u new_user update login info.\n\t");
+	printf("	     vvssh -h new_hostname -i ip -u new_user -p new_pass update login info.\n\n");
 	printf("For more see source code.\n");
 	printf(COPYRIGHT);
 	return 0;
@@ -72,6 +77,7 @@ int main (int argc, char *argv[])
     char *ip=NULL;
     char *user = NULL;  
     char *password = NULL;
+    char *key = NULL;
     char *role = NULL;  
     struct sockaddr_in sin;  
     LIBSSH2_SESSION *session;  
@@ -96,6 +102,7 @@ int main (int argc, char *argv[])
                	{"ipaddr",1,NULL,'i'},
                 {"user",1,NULL,'u'},
                 {"password",1,NULL,'p'},
+                {"key",1,NULL,'k'},
                 {"role",1,NULL,'r'},
                 {"help",0,NULL,'H'},
                 {0,0,0,0}
@@ -105,13 +112,12 @@ int main (int argc, char *argv[])
 		_help();
 		exit(1);
 	}
-	while((opt=getopt_long(argc,argv,":h: :i: :u: :p: :r: H",longopts,NULL)) != -1){
+	while((opt=getopt_long(argc,argv,":h: :i: :u: :p: :k: :r: H",longopts,NULL)) != -1){
                 switch(opt){
                 case 'h':
                         hostname=optarg;
                         break;
                 case 'i':
-                        hostaddr=inet_addr(optarg);
 			ip=optarg;
                         break;
                 case 'u':
@@ -119,6 +125,9 @@ int main (int argc, char *argv[])
                         break;
                 case 'p':
                         password=optarg;
+                        break;
+                case 'k':
+                        key=optarg;
                         break;
                 case 'r':
                         role=optarg;
@@ -145,80 +154,113 @@ int main (int argc, char *argv[])
 	char **sql_result=init_Res();
 	int sql_count=0;
 	int *psql_count=&sql_count;
+	int flag_insert=0;
+	int flag_update=0;
 
-	if(hostname!=NULL){
-		whereid="hostname";
-		sql_ret=sqlite3_alltable(whereid,hostname,sql_result,psql_count);
-		if(sql_ret==-1){
-			if((user!=NULL)&&(password!=NULL)&&(ip!=NULL)){
-				if(sqlite3_insert(hostname,ip,user,password,role))
-					fprintf(stderr,"Error: insert data fail\n");
+	if((hostname!=NULL)&&(ip!=NULL)){
+		sql_ret=sqlite3_checkinfo(hostname,NULL);
+		if(sql_ret==2){
+			sql_ret=sqlite3_checkinfo(NULL,ip);
+			if(sql_ret==2){
+				if((user!=NULL)&&((key!=NULL)||(password!=NULL))){
+					if(key==NULL)
+						key="null";
+					if(password==NULL)
+						password="null";
+					if(role==NULL)
+						role="null";
+					flag_insert=1;
+				}else{
+					fprintf(stderr,"Error:paramerter imperfect.\n");
+					free_Res(sql_result);
+					return 1;
+				}
+			}else if(sql_ret==0){
+				whereid="ip";
+				sqlite3_alltable(whereid,ip,sql_result,psql_count);
 				if(role==NULL)
-					fprintf(stderr,"Warning: Not set role description\n");
-			}else{
-				fprintf(stderr,"Error: Missing parameter\n");
-				free_Res(sql_result);
-				return 1;
+					role=sql_result[5];
+				if(key==NULL)
+					key=sql_result[4];
+				if(password==NULL)
+					password=sql_result[3];
+				if(user==NULL);
+					user=sql_result[2];
+				flag_update=2;
 			}
-		}else if(sql_ret==1){
-			if((user!=NULL)&&(password!=NULL)&&(ip!=NULL))
-				fprintf(stderr,"Warning: hostname %s query failed\n",hostname);
-			else{
-				fprintf(stderr,"Error: hostname %s query failed\n",hostname);
-				free_Res(sql_result);
-				return 1;
-			}
-		}else{
-			if((ip==NULL) || (user==NULL) || (password==NULL)){
-				ip=sql_result[1];
-                        	hostaddr=inet_addr(sql_result[1]);
-				user=sql_result[2];
+		}else if(sql_ret==0){
+			whereid="hostname";
+			sqlite3_alltable(whereid,hostname,sql_result,psql_count);
+			if(role==NULL)
+				role=sql_result[5];
+			if(key==NULL)
+				key=sql_result[4];
+			if(password==NULL)
 				password=sql_result[3];
-				role=sql_result[4];
-			}else{
-				free_Res(sql_result);
-			}
+			if(user==NULL);
+				user=sql_result[2];
+			if(strcmp(ip,sql_result[1]) || strcmp(user,sql_result[2]) || strcmp(key,sql_result[4]) || 
+				strcmp(password,sql_result[3]) || strcmp(role,sql_result[5]))
+				flag_update=1;
 		}
-		printf("Login info:%s\t%s\t%s\t%s\n",hostname,ip,user,role);
-		goto SSH;
+	}else if(hostname!=NULL){
+		sql_ret=sqlite3_checkinfo(hostname,NULL);
+		if(sql_ret==2){
+			fprintf(stderr,"Error:unknown host name %s.\n",hostname);
+			free_Res(sql_result);
+			return 1;
+		}else if(sql_ret==0){
+			whereid="hostname";
+			sqlite3_alltable(whereid,hostname,sql_result,psql_count);
+			if(role==NULL)
+				role=sql_result[5];
+			if(key==NULL)
+				key=sql_result[4];
+			if(password==NULL)
+				password=sql_result[3];
+			if(user==NULL);
+				user=sql_result[2];
+			ip=sql_result[1];
+			if(strcmp(user,sql_result[2]) || strcmp(key,sql_result[4]) || 
+				strcmp(password,sql_result[3]) || strcmp(role,sql_result[5]))
+				flag_update=1;
+		}
+	}else if(ip!=NULL){
+		sql_ret=sqlite3_checkinfo(NULL,ip);
+		if(sql_ret==2){
+			fprintf(stderr,"Error:unknown ipadder %s.\n",ip);
+			free_Res(sql_result);
+			return 1;
+		}else if(sql_ret==0){
+			whereid="ip";
+			sqlite3_alltable(whereid,ip,sql_result,psql_count);
+			if(role==NULL)
+				role=sql_result[5];
+			if(key==NULL)
+				key=sql_result[4];
+			if(password==NULL)
+				password=sql_result[3];
+			if(user==NULL);
+				user=sql_result[2];
+			hostname=sql_result[0];
+			if(strcmp(user,sql_result[2]) || strcmp(key,sql_result[4]) || 
+				strcmp(password,sql_result[3]) || strcmp(role,sql_result[5]))
+				flag_update=2;
+		}
 	}
 
-	if(ip!=NULL){
-		whereid="ip";
-		sql_ret=sqlite3_alltable(whereid,ip,sql_result,psql_count);
-		if(sql_ret==-1){
-			if((user!=NULL)&&(password!=NULL)&&(hostname!=NULL)){
-				if(sqlite3_insert(hostname,ip,user,password,role))
-					fprintf(stderr,"Error: insert data fail\n");
-				if(role==NULL)
-					fprintf(stderr,"Warning: Not set role description\n");
-			}else{
-				fprintf(stderr,"Error: Missing parameter\n");
-				free_Res(sql_result);
-				return 1;
-			}
-		}else if(sql_ret==1){
-			if((user!=NULL)&&(password!=NULL))
-				fprintf(stderr,"Warning: ip %s query failed\n",ip);
-			else{
-				fprintf(stderr,"Error: ip %s query failed\n",ip);
-				free_Res(sql_result);
-				return 1;
-			}
-		}else{
-			if((user==NULL) || (password==NULL)){
-				hostname=sql_result[0];
-				user=sql_result[2];
-				password=sql_result[3];
-				role=sql_result[4];
-			}else{
-				free_Res(sql_result);
-			}
-		}
-		printf("Login info:%s\t%s\t%s\t%s\n",hostname,ip,user,role);
+	if(sql_ret==1){
+		fprintf(stderr,"database error.\n");
+		free_Res(sql_result);
+		return 1;
 	}
+	
+	hostaddr=inet_addr(ip);
 
-  SSH:
+	printf("Login info:%s\t%s\t%s\t%s\n",hostname,ip,user,role);
+
+
+    /* SSH INIT */
     if (libssh2_init (0) != 0) {  
         fprintf (stderr, "libssh2 initialization failed\n");  
         return -1;  
@@ -239,13 +281,48 @@ int main (int argc, char *argv[])
         fprintf(stderr, "Failed Start the SSH session\n");  
         return -1;  
     }  
-      
+    
+
+    /* Authenticate via public key */   
+    if (libssh2_userauth_publickey_fromfile(session, user,NULL,key,NULL)){
+        fprintf(stderr, "\tAuthentication by public key failed!\n");
+    }else{
+    	goto SSH_START;
+    }
+
     /* Authenticate via password */   
     if (libssh2_userauth_password(session, user, password) != 0) {  
-        fprintf(stderr, "Failed to authenticate\n");  
+        fprintf(stderr, "\tAuthentication by password failed!\n");
         close(sock);  
         goto ERROR;  
     }  
+
+SSH_START:
+    /* Insert and update login data */
+    if(flag_insert==1){
+    	if(sqlite3_insert(hostname,ip,user,password,key,role))
+		fprintf(stderr,"Error:insert data failed.\n");
+    }
+    if(flag_update==1){
+    	if(sqlite3_delete(hostname,NULL))
+		fprintf(stderr,"Error:update data failed.\n");
+	else{
+		if(sqlite3_insert(hostname,ip,user,password,key,role))
+			fprintf(stderr,"Error:update data failed.\n");
+		else
+			fprintf(stderr,"Update data successful.\n");
+	}
+    }else if(flag_update==2){
+    	if(sqlite3_delete(NULL,ip))
+		fprintf(stderr,"Error:update data failed.\n");
+	else{
+		if(sqlite3_insert(hostname,ip,user,password,key,role))
+			fprintf(stderr,"Error:update data failed.\n");
+		else
+			fprintf(stderr,"Update data successful.\n");
+	}
+    }
+
       
     /* Open a channel */   
     channel = libssh2_channel_open_session(session);  

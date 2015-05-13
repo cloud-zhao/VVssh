@@ -21,7 +21,7 @@ int _sqlite3_connect(void){
 }
 
 int sqlite3_create(void){
-	char *sql_create_table="create table hostinfo(hostname varchar(50) not null,ip varchar(20) not null,primary key (hostname,ip),user varchar(20) default 'root',password varchar(255),pkey varchar(100),role varchar(255))";
+	char *sql_create_table="create table hostinfo(hostname varchar(50) not null,ip varchar(20) not null,user varchar(20) default 'root',password varchar(255),pkey varchar(100),role varchar(255),primary key (hostname,ip))";
 
 	if(_sqlite3_connect())
 		return 1;
@@ -40,17 +40,10 @@ int sqlite3_create(void){
 
 int sqlite3_insert(char *host,char *ip,char *user,char *pass,char *pkey,char *role){
 	char *sql_insert="insert into hostinfo values(?,?,?,?,?,?)";
-	if(user==NULL)
-		user="root";
-	if(role==NULL)
-		role="default";
-	if((pass==NULL) && (pkey==NULL)){
-		fprintf(stderr,"Your must set password or private key\n");
+	
+	if((host==NULL) || (ip==NULL) || (user==NULL) || (pass==NULL) || (pkey==NULL) || (role==NULL)){
+		fprintf(stderr,"Parameter error:must provide host,ip,user,pass,key,role.\n");
 		return 1;
-	}else if(pass==NULL){
-		pass="123456";
-	}else if(pkey==NULL){
-		pkey="/root/.ssh/id_rsa";
 	}
 
 	if(_sqlite3_connect())
@@ -71,6 +64,40 @@ int sqlite3_insert(char *host,char *ip,char *user,char *pass,char *pkey,char *ro
                 sqlite3_step(stmt);
         }
         sqlite3_finalize(stmt);
+
+	return 0;
+}
+
+int sqlite3_delete(char *host,char *ip){
+	char sql_delete[100];
+
+	if((host==NULL)&&(ip==NULL)){
+		fprintf(stderr,"Must set host or ip.\n");
+		return 1;
+	}
+	if(host!=NULL){
+		strcpy(sql_delete,"delete from hostinfo where hostname=");
+		strcat(sql_delete,"'");
+		strcat(sql_delete,host);
+		strcat(sql_delete,"';");
+	}else if(ip!=NULL){
+		strcpy(sql_delete,"delete from hostinfo where ip=");
+		strcat(sql_delete,"'");
+		strcat(sql_delete,ip);
+		strcat(sql_delete,"';");
+	}
+
+	if(_sqlite3_connect())
+		return 1;
+        ret=sqlite3_exec(db,sql_delete,NULL,NULL,&errmsg);
+        if(ret != SQLITE_OK){
+                fprintf(stderr,"delete row failed:%s\n",errmsg);
+		sqlite3_free(errmsg);
+		_sqlite3_disconnect();
+		return 1;
+        }
+        sqlite3_free(errmsg);
+	_sqlite3_disconnect();
 
 	return 0;
 }
@@ -155,6 +182,52 @@ int sqlite3_alltable(char *whereid,char *wherevlaue,char **result,int *count){
 			//printf("\t%s\n",result[i]);
 		}
 		*count=ncol;
+	}
+	sqlite3_free_table(presult);
+	sqlite3_free(errmsg);
+	_sqlite3_disconnect();
+	return 0;
+}
+
+int sqlite3_checkinfo(char *host,char *ip){
+	char sql_select[255]="select * from hostinfo where ";
+
+	if((host==NULL)&&(ip==NULL))
+		return 1;
+	if((host!=NULL)&&(ip!=NULL))
+		return 1;
+
+	if((host!=NULL)&&(ip==NULL)){
+		strcat(sql_select,"hostname='");
+		strcat(sql_select,host);
+		strcat(sql_select,"';");
+	}
+	if((ip!=NULL)&&(host==NULL)){
+		strcat(sql_select,"ip='");
+		strcat(sql_select,ip);
+		strcat(sql_select,"';");
+	}
+
+	char **presult;
+	int nrow,ncol,i;
+
+	if(_sqlite3_connect())
+			return 1;
+	ret=sqlite3_get_table(db,sql_select,&presult,&nrow,&ncol,&errmsg);
+	if(errmsg!=NULL){
+		fprintf(stderr,"get table fail:%s\n",errmsg);
+		sqlite3_free_table(presult);
+		sqlite3_free(errmsg);
+		_sqlite3_disconnect();
+		return 1;
+	}
+	if(ret==SQLITE_OK){
+		if(nrow==0){
+			sqlite3_free_table(presult);
+			sqlite3_free(errmsg);
+			_sqlite3_disconnect();
+			return 2;
+		}
 	}
 	sqlite3_free_table(presult);
 	sqlite3_free(errmsg);
