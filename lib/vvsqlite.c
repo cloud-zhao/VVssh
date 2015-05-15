@@ -9,8 +9,19 @@ int _sqlite3_disconnect(void){
 }
 
 int _sqlite3_connect(void){
+	char datafile[1024]="./../data/";
+	struct passwd *pwd;
 
-	ret=sqlite3_open("./../data/mydata.db",&db);
+	pwd=getpwuid(getuid());
+	if(pwd==NULL){
+		fprintf(stderr,"Get user error.\n");
+		return 1;
+	}else{
+		strcat(datafile,pwd->pw_name);
+		strcat(datafile,"_data.db");
+	}
+
+	ret=sqlite3_open(datafile,&db);
 	if(ret != SQLITE_OK){
 		fprintf(stderr,"Cannot open db:%s\n",sqlite3_errmsg(db));
 		return 1;
