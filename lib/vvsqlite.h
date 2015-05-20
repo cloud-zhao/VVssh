@@ -61,7 +61,7 @@ int _sqlite3_disconnect(void);
 int sqlite3_alltable(char *whereid,char *wherevlaue,char **result,int *count);
 
 //check host or ip exists
-int sqlite3_checkinfo(char *host,char *ip);
+int sqlite3_checkinfo(const char *id,const char *value);
 
 //initialization struct result;
 Res* init_res(void);

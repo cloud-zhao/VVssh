@@ -155,12 +155,12 @@ int main (int argc, char *argv[])
 	int sql_count=0;
 	int *psql_count=&sql_count;
 	int flag_insert=0;
-	int flag_update=0;
+	int flag_update=-1;
 
 	if((hostname!=NULL)&&(ip!=NULL)){
-		sql_ret=sqlite3_checkinfo(hostname,NULL);
+		sql_ret=sqlite3_checkinfo("hostname",hostname);
 		if(sql_ret==2){
-			sql_ret=sqlite3_checkinfo(NULL,ip);
+			sql_ret=sqlite3_checkinfo("ip",ip);
 			if(sql_ret==2){
 				if((user!=NULL)&&((key!=NULL)||(password!=NULL))){
 					if(key==NULL)
@@ -178,82 +178,59 @@ int main (int argc, char *argv[])
 			}else if(sql_ret==0){
 				whereid="ip";
 				sqlite3_alltable(whereid,ip,sql_result,psql_count);
-				if(role==NULL)
-					role=sql_result[5];
-				if(key==NULL)
-					key=sql_result[4];
-				if(password==NULL)
-					password=sql_result[3];
-				if(user==NULL);
-					user=sql_result[2];
-				flag_update=2;
+				flag_update=10;
 			}
 		}else if(sql_ret==0){
 			whereid="hostname";
 			sqlite3_alltable(whereid,hostname,sql_result,psql_count);
-			if(role==NULL)
-				role=sql_result[5];
-			if(key==NULL)
-				key=sql_result[4];
-			if(password==NULL)
-				password=sql_result[3];
-			if(user==NULL);
-				user=sql_result[2];
-			if(strcmp(ip,sql_result[1]) || strcmp(user,sql_result[2]) || strcmp(key,sql_result[4]) || 
-				strcmp(password,sql_result[3]) || strcmp(role,sql_result[5]))
-				flag_update=1;
+			flag_update=0;
 		}
-	}else if(hostname!=NULL){
-		sql_ret=sqlite3_checkinfo(hostname,NULL);
-		if(sql_ret==2){
-			fprintf(stderr,"Error:unknown host name %s.\n",hostname);
-			free_Res(sql_result);
-			return 1;
-		}else if(sql_ret==0){
-			whereid="hostname";
-			sqlite3_alltable(whereid,hostname,sql_result,psql_count);
-			if(role==NULL)
-				role=sql_result[5];
-			if(key==NULL)
-				key=sql_result[4];
-			if(password==NULL)
-				password=sql_result[3];
-			if(user==NULL);
-				user=sql_result[2];
-			ip=sql_result[1];
-			if(strcmp(user,sql_result[2]) || strcmp(key,sql_result[4]) || 
-				strcmp(password,sql_result[3]) || strcmp(role,sql_result[5]))
-				flag_update=1;
-		}
-	}else if(ip!=NULL){
-		sql_ret=sqlite3_checkinfo(NULL,ip);
-		if(sql_ret==2){
-			fprintf(stderr,"Error:unknown ipadder %s.\n",ip);
-			free_Res(sql_result);
-			return 1;
-		}else if(sql_ret==0){
-			whereid="ip";
-			sqlite3_alltable(whereid,ip,sql_result,psql_count);
-			if(role==NULL)
-				role=sql_result[5];
-			if(key==NULL)
-				key=sql_result[4];
-			if(password==NULL)
-				password=sql_result[3];
-			if(user==NULL);
-				user=sql_result[2];
-			hostname=sql_result[0];
-			if(strcmp(user,sql_result[2]) || strcmp(key,sql_result[4]) || 
-				strcmp(password,sql_result[3]) || strcmp(role,sql_result[5]))
-				flag_update=2;
+	}else{
+		if(hostname!=NULL){
+			sql_ret=sqlite3_checkinfo("hostname",hostname);
+			if(sql_ret==2){
+				fprintf(stderr,"Error:unknown host name %s.\n",hostname);
+				free_Res(sql_result);
+				return 1;
+			}else if(sql_ret==0){
+				whereid="hostname";
+				sqlite3_alltable(whereid,hostname,sql_result,psql_count);
+				ip=sql_result[1];
+				flag_update=0;
+			}
+		}else if(ip!=NULL){
+			sql_ret=sqlite3_checkinfo("ip",ip);
+			if(sql_ret==2){
+				fprintf(stderr,"Error:unknown ipadder %s.\n",ip);
+				free_Res(sql_result);
+				return 1;
+			}else if(sql_ret==0){
+				whereid="ip";
+				sqlite3_alltable(whereid,ip,sql_result,psql_count);
+				hostname=sql_result[0];
+				flag_update=10;
+			}
 		}
 	}
 
 	if(sql_ret==1){
-		fprintf(stderr,"database error.\n");
+		fprintf(stderr,"Database error.\n");
 		free_Res(sql_result);
 		return 1;
 	}
+
+	if(role==NULL)
+		role=sql_result[5];
+	if(key==NULL)
+		key=sql_result[4];
+	if(password==NULL)
+		password=sql_result[3];
+	if(user==NULL);
+		user=sql_result[2];
+	if(	strcmp(user,sql_result[2]) || strcmp(key,sql_result[4]) || 
+		strcmp(password,sql_result[3]) || strcmp(role,sql_result[5]) ||
+		strcmp(hostname,sql_result[0]) || strcmp(ip,sql_result[1]))
+		flag_update+=1;
 	
 	hostaddr=inet_addr(ip);
 
@@ -312,7 +289,7 @@ SSH_START:
 		else
 			fprintf(stderr,"Update data successful.\n");
 	}
-    }else if(flag_update==2){
+    }else if(flag_update==11){
     	if(sqlite3_delete(NULL,ip))
 		fprintf(stderr,"Error:update data failed.\n");
 	else{

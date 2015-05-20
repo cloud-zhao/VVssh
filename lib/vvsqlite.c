@@ -200,50 +200,38 @@ int sqlite3_alltable(char *whereid,char *wherevlaue,char **result,int *count){
 	return 0;
 }
 
-int sqlite3_checkinfo(char *host,char *ip){
+int _mycb(void *fg,int ncol,char **resultcol,char **namecol){
+	int *flag_ret=(int*)fg;
+	*flag_ret=0;
+	return 1;
+}
+
+int sqlite3_checkinfo(const char *id,const char *value){
 	char sql_select[255]="select * from hostinfo where ";
 
-	if((host==NULL)&&(ip==NULL))
-		return 1;
-	if((host!=NULL)&&(ip!=NULL))
+	if((value==NULL)||(id==NULL))
 		return 1;
 
-	if((host!=NULL)&&(ip==NULL)){
-		strcat(sql_select,"hostname='");
-		strcat(sql_select,host);
-		strcat(sql_select,"';");
-	}
-	if((ip!=NULL)&&(host==NULL)){
-		strcat(sql_select,"ip='");
-		strcat(sql_select,ip);
-		strcat(sql_select,"';");
-	}
+	strcat(sql_select,id);
+	strcat(sql_select,"='");
+	strcat(sql_select,value);
+	strcat(sql_select,"';");
 
-	char **presult;
-	int nrow,ncol,i;
+	int flag_ret=2;
 
 	if(_sqlite3_connect())
 			return 1;
-	ret=sqlite3_get_table(db,sql_select,&presult,&nrow,&ncol,&errmsg);
-	if(errmsg!=NULL){
-		fprintf(stderr,"get table fail:%s\n",errmsg);
-		sqlite3_free_table(presult);
+	ret=sqlite3_exec(db,sql_select,&_mycb,&flag_ret,&errmsg);
+	if((ret!=SQLITE_ABORT)&&(ret!=SQLITE_OK)){
+		fprintf(stderr,"Sql exec failed:%s\n",errmsg);
 		sqlite3_free(errmsg);
 		_sqlite3_disconnect();
 		return 1;
 	}
-	if(ret==SQLITE_OK){
-		if(nrow==0){
-			sqlite3_free_table(presult);
-			sqlite3_free(errmsg);
-			_sqlite3_disconnect();
-			return 2;
-		}
-	}
-	sqlite3_free_table(presult);
+
 	sqlite3_free(errmsg);
 	_sqlite3_disconnect();
-	return 0;
+	return flag_ret;
 }
 
 Res* init_res(void){
