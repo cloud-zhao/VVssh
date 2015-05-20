@@ -46,6 +46,28 @@ static int _normal_mode(void)
     return 0;  
 }
 
+static int ifip(const char *ip){
+	unsigned long addr;
+	if(ip==NULL)
+		return 1;
+	addr=inet_addr(ip);
+	if(addr==INADDR_NONE)
+		return 1;
+	else
+		return 0;
+}
+
+static int ifstr(char *ps,char pt){
+	if(ps==NULL)
+		return 0;
+	while(*ps){
+		if(*ps == pt)
+			return 1;
+		ps++;
+	}
+	return 0;
+}
+
 static int _help(void){
 	printf("Options:\n\t");
 	printf("-h,\t--hostname\t\t\tTarget host name.\n\t");
@@ -113,12 +135,20 @@ int main (int argc, char *argv[])
 		exit(1);
 	}
 	while((opt=getopt_long(argc,argv,":h: :i: :u: :p: :k: :r: H",longopts,NULL)) != -1){
+		if(ifstr(optarg,';')){
+			fprintf(stderr,"Error:Parameters containing illegal characters ';'.\n");
+			exit(1);
+		}
                 switch(opt){
                 case 'h':
                         hostname=optarg;
                         break;
                 case 'i':
 			ip=optarg;
+			if(ifip(ip)){
+				fprintf(stderr,"Error:ip address is illegal.\n");
+				exit(1);
+			}
                         break;
                 case 'u':
                         user=optarg;
