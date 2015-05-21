@@ -1,6 +1,11 @@
 #include "vvsqlite.h"
 
-int _sqlite3_disconnect(void){
+static sqlite3 *db;
+static char *errmsg;
+static int ret;
+static sqlite3_stmt *stmt;
+
+static int _sqlite3_disconnect(void){
 	if(db==NULL){
 		return 0;
 	}
@@ -8,7 +13,7 @@ int _sqlite3_disconnect(void){
 	return 0;
 }
 
-int _sqlite3_connect(void){
+static int _sqlite3_connect(void){
 	char datafile[1024]="./../data/";
 	struct passwd *pwd;
 

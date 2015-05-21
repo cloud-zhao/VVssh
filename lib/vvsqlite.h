@@ -34,10 +34,12 @@ typedef struct Result
 	char *role[10];
 }Res;
 
+/*
 sqlite3 *db;
 char *errmsg;
 int ret;
 sqlite3_stmt *stmt;
+*/
 
 // insert hostinfo
 int sqlite3_insert(char *host,char *ip,char *user,char *pass,char *pkey,char *role);
@@ -49,13 +51,13 @@ int sqlite3_delete(char *host,char *ip);
 int sqlite3_select(char *whereid,char *wherevlaue,Res *res);
 
 // connect database;
-int _sqlite3_connect(void);
+//static int _sqlite3_connect(void);
 
 // create tables;
 int sqlite3_create(void);
 
 // close database link
-int _sqlite3_disconnect(void);
+//static int _sqlite3_disconnect(void);
 
 //get_all_table to char ***pazResult
 int sqlite3_alltable(char *whereid,char *wherevlaue,char **result,int *count);
