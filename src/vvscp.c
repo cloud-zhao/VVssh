@@ -9,19 +9,18 @@ static int strpara(char *para,char *pd[],char pp[]);
 static int ifip(const char *ip);
 static int _help(void);
 
-int main(int argc,char *argv[])
-{
-	int i,recv_send;
-	const char *host=NULL;
-	const char *hostname=NULL;
-	const char *user=NULL;
-	const char *pass=NULL;
-	const char *ip=NULL;
-	const char *key=NULL;
-	const char *role=NULL;
-	const char *all=NULL;
-	const char *local_path=NULL;
-	const char *remote_path=NULL;
+int main(int argc,char *argv[]){
+	int recv_send;
+	char *host=NULL;
+	char *hostname=NULL;
+	char *user=NULL;
+	char *pass=NULL;
+	char *ip=NULL;
+	char *key=NULL;
+	char *role=NULL;
+	char *all=NULL;
+	char *local_path=NULL;
+	char *remote_path=NULL;
 	struct stat fileinfo;
 	FILE *local_file;
 	int rc=0;
