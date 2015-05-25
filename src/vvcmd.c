@@ -30,7 +30,7 @@ int main(int argc,char *argv[]){
 			if(rc==0){
 				ip=argv[1];
 			}else if(rc==2){
-				fprintf(stderr,"Error:unknown ip address %s.",host);
+				fprintf(stderr,"Error:unknown ip address %s.",argv[1]);
 				return 1;
 			}
 		}else if(!strcmp(argv[1],"all"))
