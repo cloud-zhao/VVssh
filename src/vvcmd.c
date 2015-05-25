@@ -19,7 +19,7 @@ int main(int argc,char *argv[]){
 	char *all=NULL;
 	char *cmd=NULL;
 
-	if((argc!=2)||(argc!=3)){
+	if((argc!=2)&&(argc!=3)){
 		_help();
 		return 1;
 	}
@@ -146,7 +146,7 @@ static int _help(void){
 	printf("./vvcmd host[|ip|role|all] command \n\t");
 	printf("cat file | ./vvcmd command\n");
 	printf("Description:\n\t");
-	printf("According to the host and IP executive order\n\t");
+	printf("According to the host or IP or Role or ALL executive order\n\t");
 	printf("Press standard input batch execution commands\n");
 	printf("STDIN FORMAT:\n\t");
 	printf("host[|ip]\t[user]\t[password] [key]\n\n");
