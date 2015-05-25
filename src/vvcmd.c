@@ -53,20 +53,76 @@ int main(int argc,char *argv[]){
 			fprintf(stderr,"Error:database query failed.\n");
 			return 1;
 		}
-
+		
+		char **sql_result=init_Res();
+		int sql_count;
 		cmd=argv[2];
+
 		if(ip!=NULL){
 			sqlite3_alltable("ip",ip,sql_result,&sql_count);
-
+			hostname=sql_result[0];
+			user=sql_result[2];
+			pass=sql_result[3];
+			key=sql_result[4];
+			role=sql_result[5];
+			printf("%s\t%s\t%s\t",hostname,ip,role);
+			if(ssh_cmd(ip,user,pass,key,cmd,NULL))
+				printf("ERROR\n");
+			sql_count=0;
 		}else if(all!=NULL){
-	
+			sqlite3_alltable(NULL,NULL,sql_result,&sql_count);
+			
+			int i;
+
+			for(i=0;i<sql_count;i++){
+				hostname=sql_result[i];
+				ip=sql_result[++i];
+				user=sql_result[++i];
+				pass=sql_result[++i];
+				key=sql_result[++i];
+				role=sql_result[++i];
+				printf("%s\t%s\t%s\t",hostname,ip,role);
+				if(ssh_cmd(ip,user,pass,key,cmd,NULL))
+					printf("ERROR\n");
+			}
+
+			sql_count=0;
+
 		}else if(role!=NULL){
+			sqlite3_alltable("role",role,sql_result,&sql_count);
+			
+			int i;
+
+			for(i=0;i<sql_count;i++){
+				hostname=sql_result[i];
+				ip=sql_result[++i];
+				user=sql_result[++i];
+				pass=sql_result[++i];
+				key=sql_result[++i];
+				++i;
+				printf("%s\t%s\t%s\t",hostname,ip,role);
+				if(ssh_cmd(ip,user,pass,key,cmd,NULL))
+					printf("ERROR\n");
+			}
+
+			sql_count=0;
 	
 		}else if(hostname!=NULL){
-
+			sqlite3_alltable("hostname",hostname,sql_result,&sql_count);
+			ip=sql_result[1];
+			user=sql_result[2];
+			pass=sql_result[3];
+			key=sql_result[4];
+			role=sql_result[5];
+			printf("%s\t%s\t%s\t",hostname,ip,role);
+			if(ssh_cmd(ip,user,pass,key,cmd,NULL))
+				printf("ERROR\n");
 		}
+
+		free_Res(sql_result);
 	}else if(argc==2){
-		
+		cmd=argv[1];
+		printf("RUN COMMAND: %s\n",cmd);
 	}
 
 
@@ -97,4 +153,3 @@ static int _help(void){
 	printf("For more see source code.\n");
 	return 0;
 }
-

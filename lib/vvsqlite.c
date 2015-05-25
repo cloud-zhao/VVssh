@@ -163,15 +163,18 @@ int sqlite3_select(char *whereid,char *wherevlaue,Res *res){
 }
 
 int sqlite3_alltable(char *whereid,char *wherevlaue,char **result,int *count){
-	char sql_selects[255]="select * from hostinfo where ";
-	char *sql_select=sql_selects;
-	strcat(sql_select,whereid);
-	strcat(sql_select,"='");
-	strcat(sql_select,wherevlaue);
-	strcat(sql_select,"'");
-
+	char sql_select[255]="select * from hostinfo";
+	if((whereid==NULL)&&(wherevlaue==NULL)){
+		strcat(sql_select,";");
+	}else{
+		strcat(sql_select," where ");
+		strcat(sql_select,whereid);
+		strcat(sql_select,"='");
+		strcat(sql_select,wherevlaue);
+		strcat(sql_select,"';");
+	}
 	char **presult;
-	int nrow,ncol,i;
+	int nrow,ncol,i,j;
 
 	if(_sqlite3_connect())
 			return 1;
@@ -191,13 +194,11 @@ int sqlite3_alltable(char *whereid,char *wherevlaue,char **result,int *count){
 			return -1;
 		}
 		int nn=ncol;
-		//printf("\t%d\n\t%d\n",ncol,nrow);
-		for(i=0;i<ncol;i++){
-			//result[i]=(char *)malloc(sizeof(char));
-			strcpy(result[i],presult[nn++]);
-			//printf("\t%s\n",result[i]);
-		}
-		*count=ncol;
+		for(j=0;j<nrow;j++)
+			for(i=0;i<ncol;i++)
+				strcpy(result[i],presult[nn++]);
+		
+		*count=nrow;
 	}
 	sqlite3_free_table(presult);
 	sqlite3_free(errmsg);
