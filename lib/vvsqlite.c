@@ -196,7 +196,7 @@ int sqlite3_alltable(char *whereid,char *wherevlaue,char **result,int *count){
 		int nn=ncol;
 		for(j=0;j<nrow;j++)
 			for(i=0;i<ncol;i++)
-				strcpy(result[i],presult[nn++]);
+				strcpy(result[nn-ncol],presult[nn++]);
 		
 		*count=nrow;
 	}
