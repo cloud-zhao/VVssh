@@ -194,9 +194,10 @@ int sqlite3_alltable(char *whereid,char *wherevlaue,char **result,int *count){
 			return -1;
 		}
 		int nn=ncol;
+		int k=0;
 		for(j=0;j<nrow;j++)
 			for(i=0;i<ncol;i++)
-				strcpy(result[nn-ncol],presult[nn++]);
+				strcpy(result[k++],presult[nn++]);
 		
 		*count=nrow;
 	}
