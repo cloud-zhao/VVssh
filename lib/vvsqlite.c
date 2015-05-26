@@ -6,15 +6,17 @@ static int ret;
 static sqlite3_stmt *stmt;
 
 static int _dbpwd(char *pwd){
-	int count=readlink("/proc/self/exe",pwd,sizeof(pwd));
+	char buf[1024];
+	int count=readlink("/proc/self/exe",buf,sizeof(buf));
 	if((count<0)||(count>=1024))
 		return 1;
 
-	char *rb=strrchr(pwd,'/');
+	char *rb=strrchr(buf,'/');
 	if(rb==NULL)
 		return 1;
 
-	pwd[count+2-strlen(rb)]='\0';
+	buf[count+1-strlen(rb)]='\0';
+	strcpy(pwd,buf);
 	strcat(pwd,"../data/");
 	return 0;
 }
