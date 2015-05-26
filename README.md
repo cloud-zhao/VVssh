@@ -12,6 +12,10 @@
 	Initialization database.Install database to $install_path/data/mydata.db
 #####vvssh
 	Please see vvssh -H
+#####vvcmd
+	Please see vvcmd -H
+#####vvscp
+	Please see vvscp -H
 
 ##Install
 	./configure

@@ -28,7 +28,7 @@ int main(int argc,char *argv[]){
 	char *pa[3];
 
 	//Parameter analysis
-	if((argc!=3)&&(argc!=4)){
+	if((argc!=3)&&(argc!=4)&&((argc==2)&&(!strcmp(argv[1],"-H")))){
 		_help();
 		return 1;
 	}
@@ -109,20 +109,33 @@ int main(int argc,char *argv[]){
 	printf("%s\t%s\t%s\t%s\n",user,pass,local_path,remote_path);
 	return 0;
 
+	//GET table hostinfo and run scp
 	int sql_ret=0;
 	char **sql_result=init_Res();
 	int sql_count=0;
 
 	if(ip!=NULL){
+		if(access(localfile))
+
 		sqlite3_alltable("ip",ip,sql_result,&sql_count);
+		if(user==NULL)
+			user=sql_result[2];
+		if(pass==NULL)
+			pass=sql_result[3];
+		if(key==NULL)
+			key=sql_result[4];
+		hostname=sql_result[0];
+		role=sql_result[5];
+		printf()
 
 	}else if(all!=NULL){
-	
+		sqlite3_alltable(NULL,NULL,sql_result,&sql_count);
 	}else if(role!=NULL){
-	
+		sqlite3_alltable("role",role,sql_result,&sql_count);
 	}else if(hostname!=NULL){
-	
+		sqlite3_alltable("hostname",hostname,sql_result,&sql_count);
 	}
+
 
 	return 0;
 }
@@ -207,6 +220,7 @@ static int _help(void){
 	printf("user\t\t\tTarget host user.role|all use the same user.user can set null\n\t");
 	printf("password\t\tTarget host password.role|all use the same password\n\t");
 	printf("role|all pull file localfile must directory\n");
+	printf("Use option -H printf help info.\n");
 	printf("For more see source code.\n");
 	return 0;
 }

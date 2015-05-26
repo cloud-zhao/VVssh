@@ -121,6 +121,10 @@ int main(int argc,char *argv[]){
 
 		free_Res(sql_result);
 	}else if(argc==2){
+		if(!strcmp(argv[1],"-H")){
+			_help();
+			return 0;
+		}
 		cmd=argv[1];
 		printf("RUN COMMAND: %s\n",cmd);
 	}
@@ -150,6 +154,7 @@ static int _help(void){
 	printf("Press standard input batch execution commands\n");
 	printf("STDIN FORMAT:\n\t");
 	printf("host[|ip]\t[user]\t[password] [key]\n\n");
+	printf("Use -H option printf help info.\n");
 	printf("For more see source code.\n");
 	return 0;
 }
