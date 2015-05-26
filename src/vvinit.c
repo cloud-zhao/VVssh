@@ -8,11 +8,11 @@
 #include "vvsqlite.h"
 
 static int _dbpwd(char *pwd){
-	int count=readlink("/proc/self/exe",pwd,sizeof(buf));
+	int count=readlink("/proc/self/exe",pwd,sizeof(pwd));
 	if((count<0)||(count>=1024))
 		return 1;
 
-	char *rb=strrchr(buf,'/');
+	char *rb=strrchr(pwd,'/');
 	if(rb==NULL)
 		return 1;
 

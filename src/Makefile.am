@@ -1,8 +1,12 @@
 INCLUDES=-I../lib
-bin_PROGRAMS=vvssh vvinput vvinit
+bin_PROGRAMS=vvssh vvinput vvinit vvcmd vvscp
 vvssh_SOURCES=vvssh.c
+vvcmd_SOURCES=vvcmd.c
+vvscp_SOURCES=vvscp.c
 vvinput_SOURCES=vvinput.c
 vvinit_SOURCES=vvinit.c
 vvssh_LDADD=../lib/libvvsqlite.a -lssh2 -lsqlite3
+vvcmd_LDADD=../lib/libvvsqlite.a ../lib/libvvssh.a -lssh2 -lsqlite3
+vvscp_LDADD=../lib/libvvsqlite.a ../lib/libvvssh.a -lssh2 -lsqlite3
 vvinput_LDADD=../lib/libvvsqlite.a -lsqlite3
 vvinit_LDADD=../lib/libvvsqlite.a -lsqlite3
