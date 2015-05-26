@@ -5,13 +5,31 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <pwd.h>
-#include "../lib/vvsqlite.h"
+#include "vvsqlite.h"
+
+static int _dbpwd(char *pwd){
+	int count=readlink("/proc/self/exe",pwd,sizeof(buf));
+	if((count<0)||(count>=1024))
+		return 1;
+
+	char *rb=strrchr(buf,'/');
+	if(rb==NULL)
+		return 1;
+
+	pwd[count+2-strlen(rb)]='\0';
+	strcat(pwd,"../data/");
+	return 0;
+}
 
 int main(void){
-	char *datadir="../data";
-	char datafile[1024]="../data/";
+	char datadir[1024];
+	char datafile[1024];
 	struct passwd *pwd;
+	if(_dbpwd(datafile))
+		return 1;
 
+	strcpy(datadir,datafile);
+	datadir[strlen(datadir)-1]='\0';
 	pwd=getpwuid(getuid());
 	if(pwd==NULL){
 		fprintf(stderr,"Get user error.\n");

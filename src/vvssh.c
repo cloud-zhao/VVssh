@@ -15,7 +15,7 @@
 #define _GNU_SOURCE
    
 #include <libssh2.h>  
-#include "../lib/vvsqlite.h"
+#include "vvsqlite.h"
   
 #define COPYRIGHT "VVSSH Copyright (C) 2015, V.V wlsdhzy@163.com\n"  
    
@@ -303,6 +303,7 @@ int main (int argc, char *argv[])
         close(sock);  
         goto ERROR;  
     }  
+
 
 SSH_START:
     /* Insert and update login data */

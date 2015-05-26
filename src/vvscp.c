@@ -1,5 +1,5 @@
-#include "../lib/vvsqlite.h"
-#include "../lib/vvlibssh.h"
+#include "vvsqlite.h"
+#include "vvlibssh.h"
 
 
 

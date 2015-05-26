@@ -5,6 +5,20 @@ static char *errmsg;
 static int ret;
 static sqlite3_stmt *stmt;
 
+static int _dbpwd(char *pwd){
+	int count=readlink("/proc/self/exe",pwd,sizeof(buf));
+	if((count<0)||(count>=1024))
+		return 1;
+
+	char *rb=strrchr(buf,'/');
+	if(rb==NULL)
+		return 1;
+
+	pwd[count+2-strlen(rb)]='\0';
+	strcat(pwd,"../data/");
+	return 0;
+}
+
 static int _sqlite3_disconnect(void){
 	if(db==NULL){
 		return 0;
@@ -14,9 +28,11 @@ static int _sqlite3_disconnect(void){
 }
 
 static int _sqlite3_connect(void){
-	char datafile[1024]="./../data/";
+	char datafile[1024];
 	struct passwd *pwd;
 
+	if(_dbpwd(datafile))
+		return 1;
 	pwd=getpwuid(getuid());
 	if(pwd==NULL){
 		fprintf(stderr,"Get user error.\n");

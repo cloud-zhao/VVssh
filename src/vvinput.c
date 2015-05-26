@@ -4,7 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pwd.h>
-#include "../lib/vvsqlite.h"
+#include "vvsqlite.h"
 
 
 char *example="hostname|ip|user|password|private key|role\n\tor use /** Notes\nEx:\n\t"
@@ -29,7 +29,7 @@ int row_analyse(char strs[]){
 	}
 	if((i!=6) || (!strcmp(hostinfo[0],"null")) || (!strcmp(hostinfo[1],"null"))){
 		fprintf(stderr,"file content format error:\n%s\n",example);
-		return 0;
+		return 1;
 	}
 	if(!strcmp(hostinfo[2],"null")){
 		struct passwd *pwd;

@@ -248,7 +248,7 @@ static _ssh_cmd(const char *cmd,char *result){
 						fputc(buffer[i],stdout);
 				else{
 					for(i=0;i<rc;i++)
-						fputc(buffer[i],stdout);
+						*(result+i)=*(buffer+i);
 				}
 				//fprintf(stdout,"\n");
 			}
