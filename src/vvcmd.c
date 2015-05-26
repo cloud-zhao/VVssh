@@ -7,6 +7,7 @@ static int ifstr(char *ps,char pt);
 static int ifip(const char *ip);
 static int ip_cmd(void);
 static int host_cmd(void);
+static int free_host(void);
 static int _help(void);
 
 static char *hostname=NULL;
@@ -112,7 +113,8 @@ int main(int argc,char *argv[]){
 
 			while(fgets(content,256,stdin)!=NULL){
 				int len=strlen(content);
-				content[len-1]='\0';
+				if(content[len-1]=='\n')
+					content[len-1]='\0';
 				if(!ifip(content)){
 					rc=sqlite3_checkinfo("ip",content);
 					if(rc==0){
@@ -141,7 +143,6 @@ int main(int argc,char *argv[]){
 			}
 		}
 	}
-
 
 	return 0;
 }
@@ -174,6 +175,7 @@ static int ip_cmd(void){
 
 	free_Res(sql_result);
 	sql_count=0;
+	free_host();
 	return 0;
 }
 
@@ -193,6 +195,18 @@ static int host_cmd(void){
 	
 	free_Res(sql_result);
 	sql_count=0;
+	free_host();
+	return 0;
+}
+
+static int free_host(void){	
+	hostname=NULL;
+	user=NULL;
+	pass=NULL;
+	ip=NULL;
+	key=NULL;
+	role=NULL;
+	all=NULL;
 	return 0;
 }
 
