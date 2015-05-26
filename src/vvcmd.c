@@ -182,7 +182,7 @@ static int host_cmd(void){
 	int sql_count;
 
 	sqlite3_alltable("hostname",hostname,sql_result,&sql_count);
-	hostname=sql_result[0];
+	ip=sql_result[1];
 	user=sql_result[2];
 	pass=sql_result[3];
 	key=sql_result[4];
