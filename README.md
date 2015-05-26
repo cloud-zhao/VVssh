@@ -1,6 +1,8 @@
 ##Description
 
 	This is a simple SSH client
+ 	And batch execution command
+	And batch file transfer
 ##Function
 
 	Record your login information,help you to log in again for the future
