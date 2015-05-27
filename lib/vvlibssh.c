@@ -252,8 +252,26 @@ static _ssh_cmd(const char *cmd,char *result){
 				flag_rc++;
 		}while(rc>0);
 
-		if(flag_rc==1)
-			printf("OK\n");
+		if(flag_rc==1){
+			do{
+				char buffer[0x4000];
+				rc=libssh2_channel_read(channel,buffer,sizeof(buffer));
+				if(rc>0){
+					flag_rc+=10;
+					int i;
+					if(result==NULL)
+						for(i=0;i<rc;i++)
+							fputc(buffer[i],stdout);
+					else{
+						for(i=0;i<rc;i++)
+							*(result+i)=*(buffer+i);
+					}
+				}else if(rc==0)
+					flag_rc+=10;
+			}while(rc>0);
+			if(flag_rc==11)
+				printf("OK\n");
+		}
 
 		if(rc==LIBSSH2_ERROR_EAGAIN){
 			_waitsocket();
