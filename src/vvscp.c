@@ -1,5 +1,6 @@
 #include "vvsqlite.h"
 #include "vvlibssh.h"
+#include "vvhead.h"
 
 
 
@@ -7,6 +8,8 @@ static int ifstr(char *ps,char pt);
 static int formatpara(char *para);
 static int strpara(char *para,char *pd[],char pp[]);
 static int ifip(const char *ip);
+static int ifdir(const char *path);
+static int ptype(char *path,int flag);
 static int _help(void);
 
 int main(int argc,char *argv[]){
@@ -117,21 +120,12 @@ int main(int argc,char *argv[]){
 	if(ip!=NULL){
 		if(access(localfile))
 
-		sqlite3_alltable("ip",ip,sql_result,&sql_count);
-		if(user==NULL)
-			user=sql_result[2];
-		if(pass==NULL)
-			pass=sql_result[3];
-		if(key==NULL)
-			key=sql_result[4];
-		hostname=sql_result[0];
-		role=sql_result[5];
-		printf()
-
 	}else if(all!=NULL){
-		sqlite3_alltable(NULL,NULL,sql_result,&sql_count);
+		//sqlite3_alltable(NULL,NULL,sql_result,&sql_count);
+		fprintf(stderr,"Function temporarily unable to use\n");
 	}else if(role!=NULL){
-		sqlite3_alltable("role",role,sql_result,&sql_count);
+		//sqlite3_alltable("role",role,sql_result,&sql_count);
+		fprintf(stderr,"Function temporarily unable to use\n");
 	}else if(hostname!=NULL){
 		sqlite3_alltable("hostname",hostname,sql_result,&sql_count);
 	}
@@ -206,6 +200,45 @@ static int ifip(const char *ip){
 		return 1;
 	else
 		return 0;
+}
+
+static int ifdir(const char *path){
+	struct stat st;
+	stat(path,&st);
+	if(S_ISDIR(st.st_mode))
+		return 1;
+	else if(S_ISREG(st.st_mode))
+		return 0;
+	else
+		return -1;
+}
+
+static int ptype(char *path,int flag){
+	char lp[1024];
+
+	if(ifdir(path)==1){
+		DIR *dir=NULL;
+		struct dirent *entry;
+
+		if((dir=opendir(path))==NULL)
+			return 1;
+		while(entry=readdir(dir))
+			if(strcmp(entry->d_name,".")&&strcmp(entry->d_name,"..")){
+				strcpy(lp,path);
+				if(lp[strlen(lp)-1]=='/')
+					lp[strlen(lp)-1]='\0';
+				strcat(lp,"/");
+				strcat(lp,etry->d_name);
+				ptype(lp);
+			}
+	}else if(ifdir(path)==0){
+		if(flag==PUSH)
+			ssh_push(ip,user,pass,key,path,remotepath);
+		else if(flag==PULL)
+			ssh_pull(ip,user,pass,key,path,remotepath);
+	}
+
+	return 0;
 }
 
 static int _help(void){

@@ -234,11 +234,12 @@ static _ssh_cmd(const char *cmd,char *result){
 	}
 
 	for(;;){
-		int rc;
+		int rc,flag_rc;
 		do{
 			char buffer[0x4000];
 			rc=libssh2_channel_read(channel,buffer,sizeof(buffer));
 			if(rc>0){
+				flag_rc++;
 				int i;
 				if(result==NULL)
 					for(i=0;i<rc;i++)
@@ -247,9 +248,12 @@ static _ssh_cmd(const char *cmd,char *result){
 					for(i=0;i<rc;i++)
 						*(result+i)=*(buffer+i);
 				}
-				//fprintf(stdout,"\n");
-			}
+			}else if(rc==0)
+				flag_rc++;
 		}while(rc>0);
+
+		if(flag_rc==1)
+			printf("OK\n");
 
 		if(rc==LIBSSH2_ERROR_EAGAIN){
 			_waitsocket();
