@@ -178,7 +178,7 @@ int ssh_push(	const char *ip,
 		return 1;
         }
 
-        fprintf(stderr,"SCP session waiting to send file\n");
+        //fprintf(stderr,"SCP session waiting to send file\n");
         do{
                 nread=fread(mem,1,sizeof(mem),local_file);
                 if(nread <= 0){
@@ -198,11 +198,8 @@ int ssh_push(	const char *ip,
                 }while(nread);
         }while(1);
 
-        fprintf(stderr,"Sending EOF\n");
         libssh2_channel_send_eof(channel);
-        fprintf(stderr,"Waiting for EOF\n");
         libssh2_channel_wait_eof(channel);
-        fprintf(stderr,"Waiting for channel to close\n");
         libssh2_channel_wait_closed(channel);
 
 	_ssh_dischannel(0);
