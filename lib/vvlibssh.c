@@ -255,7 +255,7 @@ static _ssh_cmd(const char *cmd,char *result){
 		if(flag_rc==1){
 			do{
 				char buffer[0x4000];
-				rc=libssh2_channel_read(channel,buffer,sizeof(buffer));
+				rc=libssh2_channel_read_stderr(channel,buffer,sizeof(buffer));
 				if(rc>0){
 					flag_rc+=10;
 					int i;
