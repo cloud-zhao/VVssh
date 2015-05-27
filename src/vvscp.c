@@ -9,19 +9,21 @@ static int formatpara(char *para);
 static int strpara(char *para,char *pd[],char pp[]);
 static int ifip(const char *ip);
 static int ifdir(const char *path);
-static int ptype(char *path,int flag);
+static int ptype(char *path,char *rpath,int flag);
 static int _help(void);
 
+
+static char *host=NULL;
+static char *hostname=NULL;
+static char *user=NULL;
+static char *pass=NULL;
+static char *ip=NULL;
+static char *key=NULL;
+static char *role=NULL;
+static char *all=NULL;
+
 int main(int argc,char *argv[]){
-	int recv_send;
-	char *host=NULL;
-	char *hostname=NULL;
-	char *user=NULL;
-	char *pass=NULL;
-	char *ip=NULL;
-	char *key=NULL;
-	char *role=NULL;
-	char *all=NULL;
+	int flag_rs;
 	char *local_path=NULL;
 	char *remote_path=NULL;
 	struct stat fileinfo;
@@ -44,7 +46,7 @@ int main(int argc,char *argv[]){
 			fprintf(stderr,"Parameter format error.\n");
 			return 1;
 		}
-		recv_send=PULL;
+		flag_rs=PULL;
 		strpara(argv[1],pa,all_para);
 		if(ifstr(argv[1],'@')){
 			user=pa[0];
@@ -60,7 +62,7 @@ int main(int argc,char *argv[]){
 			fprintf(stderr,"Parameter format error.\n");
 			return 1;
 		}
-		recv_send=PUSH;
+		flag_rs=PUSH;
 		strpara(argv[2],pa,all_para);
 		if(ifstr(argv[2],'@')){
 			user=pa[0];
@@ -72,6 +74,10 @@ int main(int argc,char *argv[]){
 		}
 		local_path=argv[1];
 	}else{
+		/*
+		 *cat file | vvscp local_file remote_file
+		 *STDIN Point
+		 */
 		fprintf(stderr,"Parameter format error.\n");
 		return 1;
 	}
@@ -118,7 +124,21 @@ int main(int argc,char *argv[]){
 	int sql_count=0;
 
 	if(ip!=NULL){
-		if(access(localfile))
+		sqlite3_alltable("ip",ip,sql_result,&sql_count);
+		hostname=sql_result[0];
+		if(user==NULL)
+			user=sql_result[2];
+		if(pass==NULL)
+			pass=sql_result[3];
+		key=sql_result[4];
+		role=sql_result[5];
+		if(flag_rs==PUSH)
+			ptype(local_path,remote_path,0);
+		if(flag_rs==PULL){
+			if(ssh_pull(ip,user,pass,key,local_path,remote_path))
+				return 1;
+			printf("%s\t%s\t%s\t%s\tOK",hostname,ip,role,remote_path);
+		}
 
 	}else if(all!=NULL){
 		//sqlite3_alltable(NULL,NULL,sql_result,&sql_count);
@@ -128,9 +148,23 @@ int main(int argc,char *argv[]){
 		fprintf(stderr,"Function temporarily unable to use\n");
 	}else if(hostname!=NULL){
 		sqlite3_alltable("hostname",hostname,sql_result,&sql_count);
+		ip=sql_result[1];
+		if(user==NULL)
+			user=sql_result[2];
+		if(pass==NULL)
+			pass=sql_result[3];
+		key=sql_result[4];
+		role=sql_result[5];
+		if(flag_rs==PUSH)
+			ptype(local_path,remote_path,0);
+		if(flag_rs==PULL){
+			if(ssh_pull(ip,user,pass,key,local_path,remote_path))
+				return 1;
+			printf("%s\t%s\t%s\t%s\tOK",hostname,ip,role,remote_path);
+		}
 	}
 
-
+	free_Res(sql_result);
 	return 0;
 }
 
@@ -213,12 +247,17 @@ static int ifdir(const char *path){
 		return -1;
 }
 
-static int ptype(char *path,int flag){
+static int ptype(char *path,char *rpath,int flag){
 	char lp[1024];
 
 	if(ifdir(path)==1){
 		DIR *dir=NULL;
 		struct dirent *entry;
+		char dircmd[1024]="/bin/mkdir -p ";
+		strcat(dircmd,path);
+
+		if(ssh_cmd(ip,user,pass,key,dircmd,NULL))
+			return 1;
 
 		if((dir=opendir(path))==NULL)
 			return 1;
@@ -232,10 +271,8 @@ static int ptype(char *path,int flag){
 				ptype(lp);
 			}
 	}else if(ifdir(path)==0){
-		if(flag==PUSH)
-			ssh_push(ip,user,pass,key,path,remotepath);
-		else if(flag==PULL)
-			ssh_pull(ip,user,pass,key,path,remotepath);
+		if(ssh_push(ip,user,pass,key,path,rpath))
+			return 1;
 	}
 
 	return 0;
