@@ -82,16 +82,13 @@ int main(int argc,char *argv[]){
 		return 1;
 	}
 
-	printf("%s\t%s\t%s\t%s\n",user,pass,local_path,remote_path);
-	return 0;
-
 	//Host information analysis
 	if(!ifip(host)){
 		rc=sqlite3_checkinfo("ip",host);
 		if(rc==0){
 			ip=host;
 		}else if(rc==2){
-			fprintf(stderr,"Error:unknown ip address %s.",host);
+			fprintf(stderr,"Error:unknown ip address %s.\n",host);
 			return 1;
 		}
 	}else if(!strcmp(host,"all"))
@@ -101,7 +98,7 @@ int main(int argc,char *argv[]){
 		if(rc==2){
 			rc=sqlite3_checkinfo("role",host);
 			if(rc==2){
-				fprintf(stderr,"Error:unknown host or role %s.",host);
+				fprintf(stderr,"Error:unknown host or role %s.\n",host);
 				return 1;
 			}else if(rc==0){
 				role=host;
@@ -114,9 +111,6 @@ int main(int argc,char *argv[]){
 		fprintf(stderr,"Error:database query failed.\n");
 		return 1;
 	}
-
-	printf("%s\t%s\t%s\t%s\n",user,pass,local_path,remote_path);
-	return 0;
 
 	//GET table hostinfo and run scp
 	int sql_ret=0;
@@ -137,7 +131,7 @@ int main(int argc,char *argv[]){
 		if(flag_rs==PULL){
 			if(ssh_pull(ip,user,pass,key,local_path,remote_path))
 				return 1;
-			printf("%s\t%s\t%s\t%s\tOK",hostname,ip,role,remote_path);
+			printf("%s\t%s\t%s\t%s\tOK\n",hostname,ip,role,remote_path);
 		}
 
 	}else if(all!=NULL){
@@ -160,7 +154,7 @@ int main(int argc,char *argv[]){
 		if(flag_rs==PULL){
 			if(ssh_pull(ip,user,pass,key,local_path,remote_path))
 				return 1;
-			printf("%s\t%s\t%s\t%s\tOK",hostname,ip,role,remote_path);
+			printf("%s\t%s\t%s\t%s\tOK\n",hostname,ip,role,remote_path);
 		}
 	}
 
@@ -267,8 +261,8 @@ static int ptype(char *path,char *rpath,int flag){
 				if(lp[strlen(lp)-1]=='/')
 					lp[strlen(lp)-1]='\0';
 				strcat(lp,"/");
-				strcat(lp,etry->d_name);
-				ptype(lp);
+				strcat(lp,entry->d_name);
+				ptype(lp,rpath,0);
 			}
 	}else if(ifdir(path)==0){
 		if(ssh_push(ip,user,pass,key,path,rpath))
