@@ -65,6 +65,9 @@ int sqlite3_alltable(char *whereid,char *wherevlaue,char **result,int *count);
 //check host or ip exists
 int sqlite3_checkinfo(const char *id,const char *value);
 
+//absolute path
+int absolute_path(char *pwd);
+
 //initialization struct result;
 Res* init_res(void);
 char** init_Res(void);
