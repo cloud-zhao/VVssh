@@ -3801,9 +3801,9 @@ fi
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-lsqlite3':
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lsqlite3" >&5
-$as_echo_n "checking for main in -lsqlite3... " >&6; }
-if ${ac_cv_lib_sqlite3_main+:} false; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sqlite3_open in -lsqlite3" >&5
+$as_echo_n "checking for sqlite3_open in -lsqlite3... " >&6; }
+if ${ac_cv_lib_sqlite3_sqlite3_open+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -3811,39 +3811,49 @@ LIBS="-lsqlite3  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char sqlite3_open ();
 int
 main ()
 {
-return main ();
+return sqlite3_open ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_sqlite3_main=yes
+  ac_cv_lib_sqlite3_sqlite3_open=yes
 else
-  ac_cv_lib_sqlite3_main=no
+  ac_cv_lib_sqlite3_sqlite3_open=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_sqlite3_main" >&5
-$as_echo "$ac_cv_lib_sqlite3_main" >&6; }
-if test "x$ac_cv_lib_sqlite3_main" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_sqlite3_sqlite3_open" >&5
+$as_echo "$ac_cv_lib_sqlite3_sqlite3_open" >&6; }
+if test "x$ac_cv_lib_sqlite3_sqlite3_open" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_LIBSQLITE3 1
 _ACEOF
 
   LIBS="-lsqlite3 $LIBS"
 
+else
+
+			echo "Error: You need to have libsqlite3 installed."
+			exit -1
 fi
 
 # FIXME: Replace `main' with a function in `-lssh2':
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lssh2" >&5
-$as_echo_n "checking for main in -lssh2... " >&6; }
-if ${ac_cv_lib_ssh2_main+:} false; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libssh2_init in -lssh2" >&5
+$as_echo_n "checking for libssh2_init in -lssh2... " >&6; }
+if ${ac_cv_lib_ssh2_libssh2_init+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -3851,33 +3861,43 @@ LIBS="-lssh2  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char libssh2_init ();
 int
 main ()
 {
-return main ();
+return libssh2_init ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_ssh2_main=yes
+  ac_cv_lib_ssh2_libssh2_init=yes
 else
-  ac_cv_lib_ssh2_main=no
+  ac_cv_lib_ssh2_libssh2_init=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssh2_main" >&5
-$as_echo "$ac_cv_lib_ssh2_main" >&6; }
-if test "x$ac_cv_lib_ssh2_main" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssh2_libssh2_init" >&5
+$as_echo "$ac_cv_lib_ssh2_libssh2_init" >&6; }
+if test "x$ac_cv_lib_ssh2_libssh2_init" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_LIBSSH2 1
 _ACEOF
 
   LIBS="-lssh2 $LIBS"
 
+else
+
+                        echo "Error: You need to have libssh2 installed!"
+                        exit -1
 fi
 
 
