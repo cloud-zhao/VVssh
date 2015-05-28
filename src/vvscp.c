@@ -33,7 +33,7 @@ int main(int argc,char *argv[]){
 	char *pa[3];
 
 	//Parameter analysis
-	if((argc!=3)&&(argc!=4)&&((argc==2)&&(!strcmp(argv[1],"-H")))){
+	if((argc!=3)&&(argc!=4)){
 		_help();
 		return 1;
 	}
