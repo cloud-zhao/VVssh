@@ -32,7 +32,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = vvssh$(EXEEXT) vvinput$(EXEEXT) vvinit$(EXEEXT)
+bin_PROGRAMS = vvssh$(EXEEXT) vvinput$(EXEEXT) vvinit$(EXEEXT) \
+	vvcmd$(EXEEXT) vvscp$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -45,12 +46,18 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
+am_vvcmd_OBJECTS = vvcmd.$(OBJEXT)
+vvcmd_OBJECTS = $(am_vvcmd_OBJECTS)
+vvcmd_DEPENDENCIES = ../lib/libvvsqlite.a ../lib/libvvssh.a
 am_vvinit_OBJECTS = vvinit.$(OBJEXT)
 vvinit_OBJECTS = $(am_vvinit_OBJECTS)
 vvinit_DEPENDENCIES = ../lib/libvvsqlite.a
 am_vvinput_OBJECTS = vvinput.$(OBJEXT)
 vvinput_OBJECTS = $(am_vvinput_OBJECTS)
 vvinput_DEPENDENCIES = ../lib/libvvsqlite.a
+am_vvscp_OBJECTS = vvscp.$(OBJEXT)
+vvscp_OBJECTS = $(am_vvscp_OBJECTS)
+vvscp_DEPENDENCIES = ../lib/libvvsqlite.a ../lib/libvvssh.a
 am_vvssh_OBJECTS = vvssh.$(OBJEXT)
 vvssh_OBJECTS = $(am_vvssh_OBJECTS)
 vvssh_DEPENDENCIES = ../lib/libvvsqlite.a
@@ -62,8 +69,10 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(vvinit_SOURCES) $(vvinput_SOURCES) $(vvssh_SOURCES)
-DIST_SOURCES = $(vvinit_SOURCES) $(vvinput_SOURCES) $(vvssh_SOURCES)
+SOURCES = $(vvcmd_SOURCES) $(vvinit_SOURCES) $(vvinput_SOURCES) \
+	$(vvscp_SOURCES) $(vvssh_SOURCES)
+DIST_SOURCES = $(vvcmd_SOURCES) $(vvinit_SOURCES) $(vvinput_SOURCES) \
+	$(vvscp_SOURCES) $(vvssh_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -156,9 +165,13 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 INCLUDES = -I../lib
 vvssh_SOURCES = vvssh.c
+vvcmd_SOURCES = vvcmd.c
+vvscp_SOURCES = vvscp.c
 vvinput_SOURCES = vvinput.c
 vvinit_SOURCES = vvinit.c
 vvssh_LDADD = ../lib/libvvsqlite.a -lssh2 -lsqlite3
+vvcmd_LDADD = ../lib/libvvsqlite.a ../lib/libvvssh.a -lssh2 -lsqlite3
+vvscp_LDADD = ../lib/libvvsqlite.a ../lib/libvvssh.a -lssh2 -lsqlite3
 vvinput_LDADD = ../lib/libvvsqlite.a -lsqlite3
 vvinit_LDADD = ../lib/libvvsqlite.a -lsqlite3
 all: all-am
@@ -232,12 +245,18 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+vvcmd$(EXEEXT): $(vvcmd_OBJECTS) $(vvcmd_DEPENDENCIES) $(EXTRA_vvcmd_DEPENDENCIES) 
+	@rm -f vvcmd$(EXEEXT)
+	$(LINK) $(vvcmd_OBJECTS) $(vvcmd_LDADD) $(LIBS)
 vvinit$(EXEEXT): $(vvinit_OBJECTS) $(vvinit_DEPENDENCIES) $(EXTRA_vvinit_DEPENDENCIES) 
 	@rm -f vvinit$(EXEEXT)
 	$(LINK) $(vvinit_OBJECTS) $(vvinit_LDADD) $(LIBS)
 vvinput$(EXEEXT): $(vvinput_OBJECTS) $(vvinput_DEPENDENCIES) $(EXTRA_vvinput_DEPENDENCIES) 
 	@rm -f vvinput$(EXEEXT)
 	$(LINK) $(vvinput_OBJECTS) $(vvinput_LDADD) $(LIBS)
+vvscp$(EXEEXT): $(vvscp_OBJECTS) $(vvscp_DEPENDENCIES) $(EXTRA_vvscp_DEPENDENCIES) 
+	@rm -f vvscp$(EXEEXT)
+	$(LINK) $(vvscp_OBJECTS) $(vvscp_LDADD) $(LIBS)
 vvssh$(EXEEXT): $(vvssh_OBJECTS) $(vvssh_DEPENDENCIES) $(EXTRA_vvssh_DEPENDENCIES) 
 	@rm -f vvssh$(EXEEXT)
 	$(LINK) $(vvssh_OBJECTS) $(vvssh_LDADD) $(LIBS)
@@ -248,8 +267,10 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vvcmd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vvinit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vvinput.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vvscp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vvssh.Po@am__quote@
 
 .c.o:

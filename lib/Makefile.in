@@ -49,6 +49,10 @@ libvvsqlite_a_AR = $(AR) $(ARFLAGS)
 libvvsqlite_a_LIBADD =
 am_libvvsqlite_a_OBJECTS = vvsqlite.$(OBJEXT)
 libvvsqlite_a_OBJECTS = $(am_libvvsqlite_a_OBJECTS)
+libvvssh_a_AR = $(AR) $(ARFLAGS)
+libvvssh_a_LIBADD =
+am_libvvssh_a_OBJECTS = vvlibssh.$(OBJEXT)
+libvvssh_a_OBJECTS = $(am_libvvssh_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -57,8 +61,8 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libvvsqlite_a_SOURCES)
-DIST_SOURCES = $(libvvsqlite_a_SOURCES)
+SOURCES = $(libvvsqlite_a_SOURCES) $(libvvssh_a_SOURCES)
+DIST_SOURCES = $(libvvsqlite_a_SOURCES) $(libvvssh_a_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -149,8 +153,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_LIBRARIES = libvvsqlite.a
+noinst_LIBRARIES = libvvsqlite.a libvvssh.a
 libvvsqlite_a_SOURCES = vvsqlite.c
+libvvssh_a_SOURCES = vvlibssh.c
+INCLUDES = -I$(top_srcdir)/lib
 all: all-am
 
 .SUFFIXES:
@@ -192,6 +198,10 @@ libvvsqlite.a: $(libvvsqlite_a_OBJECTS) $(libvvsqlite_a_DEPENDENCIES) $(EXTRA_li
 	-rm -f libvvsqlite.a
 	$(libvvsqlite_a_AR) libvvsqlite.a $(libvvsqlite_a_OBJECTS) $(libvvsqlite_a_LIBADD)
 	$(RANLIB) libvvsqlite.a
+libvvssh.a: $(libvvssh_a_OBJECTS) $(libvvssh_a_DEPENDENCIES) $(EXTRA_libvvssh_a_DEPENDENCIES) 
+	-rm -f libvvssh.a
+	$(libvvssh_a_AR) libvvssh.a $(libvvssh_a_OBJECTS) $(libvvssh_a_LIBADD)
+	$(RANLIB) libvvssh.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -199,6 +209,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vvlibssh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vvsqlite.Po@am__quote@
 
 .c.o:
