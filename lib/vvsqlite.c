@@ -10,6 +10,7 @@ int absolute_path(char *pwd){
 	int count=readlink("/proc/self/exe",buf,sizeof(buf));
 	if((count<0)||(count>=1024))
 		return 1;
+	buf[count]='\0';
 
 	char *rb=strrchr(buf,'/');
 	if(rb==NULL)
