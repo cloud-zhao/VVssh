@@ -5,7 +5,7 @@ static char *errmsg;
 static int ret;
 static sqlite3_stmt *stmt;
 
-static int absolute_path(char *pwd){
+int absolute_path(char *pwd){
 	char buf[1024];
 	int count=readlink("/proc/self/exe",buf,sizeof(buf));
 	if((count<0)||(count>=1024))
