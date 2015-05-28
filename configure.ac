@@ -15,9 +15,13 @@ AC_PROG_RANLIB
 
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-lsqlite3':
-AC_CHECK_LIB([sqlite3], [main])
+AC_CHECK_LIB(sqlite3, sqlite3_open,[],[
+			echo "Error: You need to have libsqlite3 installed."
+			exit -1])
 # FIXME: Replace `main' with a function in `-lssh2':
-AC_CHECK_LIB([ssh2], [main])
+AC_CHECK_LIB(ssh2, libssh2_init,[],[
+                        echo "Error: You need to have libssh2 installed!"
+                        exit -1])
 
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h malloc.h netinet/in.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h termios.h unistd.h])

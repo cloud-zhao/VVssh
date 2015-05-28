@@ -5,7 +5,7 @@ static char *errmsg;
 static int ret;
 static sqlite3_stmt *stmt;
 
-static int _dbpwd(char *pwd){
+int absolute_path(char *pwd){
 	char buf[1024];
 	int count=readlink("/proc/self/exe",buf,sizeof(buf));
 	if((count<0)||(count>=1024))
@@ -33,7 +33,7 @@ static int _sqlite3_connect(void){
 	char datafile[1024];
 	struct passwd *pwd;
 
-	if(_dbpwd(datafile))
+	if(absolute_path(datafile))
 		return 1;
 	pwd=getpwuid(getuid());
 	if(pwd==NULL){

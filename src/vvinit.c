@@ -7,27 +7,11 @@
 #include <pwd.h>
 #include "vvsqlite.h"
 
-static int _dbpwd(char *pwd){
-	char buf[1024];
-	int count=readlink("/proc/self/exe",buf,sizeof(buf));
-	if((count<0)||(count>=1024))
-		return 1;
-
-	char *rb=strrchr(buf,'/');
-	if(rb==NULL)
-		return 1;
-
-	buf[count+1-strlen(rb)]='\0';
-	strcpy(pwd,buf);
-	strcat(pwd,"../data/");
-	return 0;
-}
-
 int main(void){
 	char datadir[1024];
 	char datafile[1024];
 	struct passwd *pwd;
-	if(_dbpwd(datafile))
+	if(absolute_path(datafile))
 		return 1;
 
 	strcpy(datadir,datafile);
@@ -47,7 +31,7 @@ int main(void){
 	}
 					
 	if(access(datadir,0)){
-		if(mkdir(datadir,S_IRWXU|S_IRWXG|S_IRWXO)){
+		if(mkdir(datadir,S_IRWXU|S_IRWXG)){
 			fprintf(stderr,"mkdir datadir failed.\n");
 			return 1;
 		}else
@@ -58,9 +42,10 @@ int main(void){
 	else
 		printf("Database install successful.\n");
 
-	if(!access(datafile,0)){
+	if(!access(datafile,0))
 		chmod(datafile,S_IRUSR|S_IWUSR);
+	if(!strcmp(pwd->pw_name,"root"))
 		chmod(datadir,S_IRWXU|S_IRWXG|S_IRWXO);
-	}
+
 	return 0;
 }
