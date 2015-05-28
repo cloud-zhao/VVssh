@@ -34,7 +34,7 @@ int main(int argc,char *argv[]){
 
 	//Parameter analysis
 	if(argc==2){
-		if(strcmp(argv[1],"-H"))
+		if(!strcmp(argv[1],"-H"))
 			_help();
 		else
 			fprintf(stderr,"Unknown parameters\n");
