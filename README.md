@@ -9,7 +9,8 @@
 #####vvinput
 	Batch add hostinfo to database
 #####vvinit
-	Initialization database.Install database to $install_path/data/mydata.db
+	Initialization database.Install database to $install_path/data/$user_data.db
+	Supports multi-user, you must use root user initialization can
 #####vvssh
 	Please see vvssh -H
 #####vvcmd
