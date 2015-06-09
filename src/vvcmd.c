@@ -5,8 +5,7 @@
 
 static int ifstr(char *ps,char pt);
 static int ifip(const char *ip);
-static int ip_cmd(void);
-static int host_cmd(void);
+static int exec_cmd(char *hi,char *hiv);
 static int free_host(void);
 static int _help(void);
 
@@ -61,7 +60,7 @@ int main(int argc,char *argv[]){
 		cmd=argv[2];
 
 		if(ip!=NULL){
-			ip_cmd();
+			exec_cmd("ip",ip);
 		}else if(all!=NULL){
 			char **sql_result=init_Res();
 			int sql_count,i;
@@ -101,7 +100,7 @@ int main(int argc,char *argv[]){
 
 			free_Res(sql_result);
 		}else if(hostname!=NULL){
-			host_cmd();
+			exec_cmd("hostname",hostname);
 		}
 	}else if(argc==2){
 		if(!strcmp(argv[1],"-H")){
@@ -137,9 +136,9 @@ int main(int argc,char *argv[]){
 					return 1;
 				}
 				if(ip!=NULL)
-					ip_cmd();
+					exec_cmd("ip",ip);
 				else if(hostname!=NULL)
-					host_cmd();
+					exec_cmd("hostname",hostname);
 			}
 		}
 	}
@@ -159,31 +158,12 @@ static int ifip(const char *ip){
 		return 0;
 }
 
-static int ip_cmd(void){
+static int exec_cmd(char *hi,char hiv){
 	char **sql_result=init_Res();
 	int sql_count;
 
-	sqlite3_alltable("ip",ip,sql_result,&sql_count);
+	sqlite3_alltable(hi,hiv,sql_result,&sql_count);
 	hostname=sql_result[0];
-	user=sql_result[2];
-	pass=sql_result[3];
-	key=sql_result[4];
-	role=sql_result[5];
-	printf("%s\t%s\t%s\t",hostname,ip,role);
-	if(ssh_cmd(ip,user,pass,key,cmd,NULL))
-		printf("ERROR\n");
-
-	free_Res(sql_result);
-	sql_count=0;
-	free_host();
-	return 0;
-}
-
-static int host_cmd(void){
-	char **sql_result=init_Res();
-	int sql_count;
-
-	sqlite3_alltable("hostname",hostname,sql_result,&sql_count);
 	ip=sql_result[1];
 	user=sql_result[2];
 	pass=sql_result[3];
@@ -192,7 +172,7 @@ static int host_cmd(void){
 	printf("%s\t%s\t%s\t",hostname,ip,role);
 	if(ssh_cmd(ip,user,pass,key,cmd,NULL))
 		printf("ERROR\n");
-	
+
 	free_Res(sql_result);
 	sql_count=0;
 	free_host();
