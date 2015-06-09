@@ -226,7 +226,7 @@ int sqlite3_alltable(char *whereid,char *wherevlaue,char **result,int *count){
 	return 0;
 }
 
-int _mycb(void *fg,int ncol,char **resultcol,char **namecol){
+static int _mycb(void *fg,int ncol,char **resultcol,char **namecol){
 	int *flag_ret=(int*)fg;
 	*flag_ret=0;
 	return 1;
