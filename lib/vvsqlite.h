@@ -1,28 +1,15 @@
+#ifndef _VVSQLITE_H
+#define _VVSQLITE_H
+
 #include <sqlite3.h>
-#ifndef _STDIO_H
 #include <stdio.h>
-#endif
-#ifndef _STRING_H
 #include <string.h>
-#endif
-#ifndef _STDLIB_H
 #include <stdlib.h>
-#endif
-#ifndef _MALLOC_H
 #include <malloc.h>
-#endif
-#ifndef _SYS_STAT_H
 #include <sys/stat.h>
-#endif
-#ifndef _SYS_TYPES_H
 #include <sys/types.h>
-#endif
-#ifndef _UNISTD_H
 #include <unistd.h>
-#endif
-#ifndef _PWD_H
 #include <pwd.h>
-#endif
 
 typedef struct Result
 {
@@ -75,3 +62,5 @@ char** init_Res(void);
 //free struct result;
 int free_res(Res *prr);
 int free_Res(char **pres);
+
+#endif
