@@ -1,23 +1,23 @@
-##Description
+## Description
 
 	This is a simple SSH client
  	And batch execution command
 	And batch file transfer
-##Function
+## Function
 
 	Record your login information,help you to log in again for the future
-#####vvinput
+##### vvinput
 	Batch add hostinfo to database
-#####vvinit
+##### vvinit
 	Initialization database.Install database to $install_path/data/mydata.db
-#####vvssh
+##### vvssh
 	Please see vvssh -H
-#####vvcmd
+##### vvcmd
 	Please see vvcmd -H
-#####vvscp
+##### vvscp
 	Please see vvscp -H
 
-##Install
+## Install
 	./configure
 	make
 	make install
